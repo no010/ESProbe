@@ -1,0 +1,13 @@
+idf_component_register(
+    SRCS
+        "MSOS20_descriptor.c"
+        "usb_descriptor.c"
+        "usb_handle.c"
+    INCLUDE_DIRS
+        "."
+        ".."
+    REQUIRES
+        "lwip"
+    PRIV_REQUIRES
+        "main"
+)
