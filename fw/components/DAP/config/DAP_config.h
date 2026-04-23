@@ -99,7 +99,7 @@ This information includes:
   #define CPU_CLOCK 240000000
   // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<240MHz
 #elif defined CONFIG_IDF_TARGET_ESP32C3
-  #define CPU_CLOCK 16000000
+  #define CPU_CLOCK 160000000
   // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<160MHz
 #elif defined CONFIG_IDF_TARGET_ESP32S3
   #define CPU_CLOCK 240000000
@@ -143,7 +143,7 @@ This information includes:
 /// This configuration settings is used to optimize the communication performance with the
 /// debugger and depends on the USB peripheral. For devices with limited RAM or USB buffer the
 /// setting can be reduced (valid range is 1 .. 255).
-#define DAP_PACKET_COUNT 255 ///< Specifies number of packets buffered.
+#define DAP_PACKET_COUNT 8 ///< Specifies number of packets buffered.
 
 /// Indicates that the SWO function(UART SWO & Streaming Trace) is available
 #define SWO_FUNCTION_ENABLE 0 ///< SWO function:  1 = available, 0 = not available.
@@ -885,24 +885,20 @@ __STATIC_FORCEINLINE void PIN_nRESET_OUT(uint32_t bit)
   //// FIXME: unavailable
   if ((bit & 1U) == 1)
   {
-    //set bit
+    //set bit - release reset (open-drain output disabled, pulled up)
     GPIO_SET_LEVEL_HIGH(PIN_nRESET);
 #if defined CONFIG_IDF_TARGET_ESP8266 || defined CONFIG_IDF_TARGET_ESP32
     GPIO.enable_w1tc |= (0x01 << PIN_nRESET);
-#elif defined CONFIG_IDF_TARGET_ESP32C3
-    GPIO.enable_w1tc.enable_w1tc |= (0x01 << PIN_nRESET);
-#elif defined CONFIG_IDF_TARGET_ESP32S3
+#elif defined CONFIG_IDF_TARGET_ESP32C3 || defined CONFIG_IDF_TARGET_ESP32S3
     gpio_ll_output_disable(&GPIO, PIN_nRESET);
 #endif
   }
   else
   {
-    //reset bit
+    //reset bit - assert reset (open-drain output enabled, drive low)
 #if defined CONFIG_IDF_TARGET_ESP8266 || defined CONFIG_IDF_TARGET_ESP32
     GPIO.enable_w1ts |= (0x01 << PIN_nRESET);
-#elif defined CONFIG_IDF_TARGET_ESP32C3
-    GPIO.enable_w1ts.enable_w1ts |= (0x01 << PIN_nRESET);
-#elif defined CONFIG_IDF_TARGET_ESP32S3
+#elif defined CONFIG_IDF_TARGET_ESP32C3 || defined CONFIG_IDF_TARGET_ESP32S3
     gpio_ll_output_enable(&GPIO, PIN_nRESET);
 #endif
     GPIO_SET_LEVEL_LOW(PIN_nRESET);

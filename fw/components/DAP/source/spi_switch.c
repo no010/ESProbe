@@ -268,8 +268,8 @@ void DAP_SPI_Init()
 
     // In esp32, the driving of GPIO should be stopped,
     // otherwise there will be issue in the spi
-    GPIO.out_w1tc.out_w1tc = (0x1 << 6);
-    GPIO.out_w1tc.out_w1tc = (0x1 << 7);
+    gpio_ll_set_level(&GPIO, GPIO_NUM_6, 0);
+    gpio_ll_set_level(&GPIO, GPIO_NUM_7, 0);
 
 
     // We will use IO_MUX to get the maximum speed.
@@ -483,14 +483,17 @@ __FORCEINLINE void DAP_SPI_Deinit()
     PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[6], PIN_FUNC_GPIO);
     PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[7], PIN_FUNC_GPIO); // MOSI
 
-    GPIO.func_out_sel_cfg[GPIO_NUM_6].out_sel = CPU_GPIO_OUT1_IDX;
+    // Route GPIO output to software-controlled GPIO_OUT_REG (SIG_GPIO_OUT_IDX=256)
+    // instead of dedic_gpio (CPU_GPIO_OUTx_IDX), since dedic_gpio CSR instructions
+    // are not available in ESP-IDF 5.5 and gpio_ll_set_level() writes GPIO_OUT_REG.
+    GPIO.func_out_sel_cfg[GPIO_NUM_6].out_sel = SIG_GPIO_OUT_IDX;
     GPIO.func_out_sel_cfg[GPIO_NUM_6].oen_sel = 0;
 
-    GPIO.func_out_sel_cfg[GPIO_NUM_7].out_sel = CPU_GPIO_OUT0_IDX;
+    GPIO.func_out_sel_cfg[GPIO_NUM_7].out_sel = SIG_GPIO_OUT_IDX;
     GPIO.func_out_sel_cfg[GPIO_NUM_7].oen_sel = 0;
 
-    GPIO.func_in_sel_cfg[CPU_GPIO_IN0_IDX].sig_in_sel = 1;
-    GPIO.func_in_sel_cfg[CPU_GPIO_IN0_IDX].in_sel = GPIO_NUM_7;
+    GPIO.func_in_sel_cfg[FSPID_IN_IDX].sig_in_sel = 0;
+    GPIO.func_in_sel_cfg[FSPID_IN_IDX].in_sel = GPIO_NUM_7;
 
     // enable SWCLK/MOSI output
     gpio_ll_output_enable(&GPIO, GPIO_NUM_6);
