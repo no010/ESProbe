@@ -1,4 +1,20 @@
 menu "wireless dap config"
     config USE_WEBSOCKET_DAP
         bool "Enable the websocket dap feature"
+
+    menu "WiFi Configuration"
+        config WIFI_SSID_1
+            string "WiFi SSID 1"
+            default "OTA"
+        config WIFI_PASS_1
+            string "WiFi Password 1"
+            default "12345678"
+
+        config WIFI_SSID_2
+            string "WiFi SSID 2"
+            default "DAP"
+        config WIFI_PASS_2
+            string "WiFi Password 2"
+            default "12345678"
+    endmenu
 endmenu
