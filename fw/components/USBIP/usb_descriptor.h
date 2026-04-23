@@ -4,9 +4,9 @@
 #include "main/dap_configuration.h"
 
 // Vendor ID assigned by USB-IF (idVendor).
-#define USBD0_DEV_DESC_IDVENDOR 0xC251
+#define USBD0_DEV_DESC_IDVENDOR 0x0D28
 // Product ID assigned by manufacturer (idProduct).
-#define USBD0_DEV_DESC_IDPRODUCT 0xF00A
+#define USBD0_DEV_DESC_IDPRODUCT 0x0204
 // Device Release Number in binary-coded decimal (bcdDevice).
 #define USBD0_DEV_DESC_BCDDEVICE 0x0100
 
@@ -46,8 +46,8 @@
 // common part
 extern const uint8_t kUSBd0DeviceDescriptor[0x12];
 extern const uint8_t kLangDescriptor[0x04];
-extern const uint8_t kManufacturerString[0x28];
-extern const uint8_t kProductString[0x18];
+extern const uint8_t kManufacturerString[0x08];
+extern const uint8_t kProductString[0x14];
 extern const uint8_t kSerialNumberString[0x1A];
 
 #if (USE_WINUSB == 1)
@@ -59,12 +59,12 @@ extern const uint8_t kUSBd0InterfaceDescriptor[0x1E];
 #endif // USE_USB_3_0 == 1
 
 extern const uint8_t kUSBd0ConfigDescriptor[0x09];
-extern const uint8_t kInterfaceString[0x2C];
+extern const uint8_t kInterfaceString[0x14];
 
 #else
 extern const uint8_t kUSBd0InterfaceDescriptor[0x20];
 extern const uint8_t kUSBd0ConfigDescriptor[0x09];
-extern const uint8_t kInterfaceString[0x2C];
+extern const uint8_t kInterfaceString[0x14];
 extern const uint8_t kHidReportDescriptor[0x21];
 
 #endif

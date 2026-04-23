@@ -21,6 +21,9 @@
 #define unlikely(x)    __builtin_expect(!!(x), 0)
 #endif
 
+// Set to 1 to enable verbose hex-dump logging (slows down USB enumeration)
+#define USBIP_DEBUG_VERBOSE 0
+
 // attach helper function
 static int read_stage1_command(uint8_t *buffer, uint32_t length);
 static void handle_device_list(uint8_t *buffer, uint32_t length);
@@ -38,13 +41,52 @@ static void handle_unlink(usbip_stage2_header *header);
 // unlink helper function
 static void send_stage2_unlink(usbip_stage2_header *req_header);
 
+
+#if (USBIP_DEBUG_VERBOSE == 1)
+static void debug_dump_bytes(const char *tag, const uint8_t *data, size_t length)
+{
+    char line[128];
+    size_t offset = 0;
+
+    while (offset < length) {
+        size_t chunk = ((length - offset) > 16U) ? 16U : (length - offset);
+        int pos = snprintf(line, sizeof(line), "%s +%02u:", tag, (unsigned)offset);
+        for (size_t i = 0; i < chunk && pos > 0 && pos < (int)sizeof(line); ++i) {
+            pos += snprintf(&line[pos], sizeof(line) - (size_t)pos, " %02X", data[offset + i]);
+        }
+        os_printf("%s\r\n", line);
+        offset += chunk;
+    }
+}
+
+static void debug_dump_usbip_header(const char *tag, const usbip_stage2_header *header)
+{
+    debug_dump_bytes(tag, (const uint8_t *)header, sizeof(usbip_stage2_header));
+}
+#else
+#define debug_dump_bytes(tag, data, length)     ((void)0)
+#define debug_dump_usbip_header(tag, header)    ((void)0)
+#endif
+
 int usbip_network_send(int s, const void *dataptr, size_t size, int flags) {
 #if (USE_KCP == 1)
     return kcp_network_send(dataptr, size);
 #elif (USE_TCP_NETCONN == 1)
     return tcp_netconn_send(dataptr, size);
 #else // BSD style
-    return send(s, dataptr, size, flags);
+    const uint8_t *data = (const uint8_t *)dataptr;
+    size_t remaining = size;
+
+    while (remaining > 0) {
+        int sent = send(s, data, remaining, flags);
+        if (sent <= 0) {
+            return sent;
+        }
+        data += sent;
+        remaining -= (size_t)sent;
+    }
+
+    return (int)size;
 #endif
 }
 
@@ -80,7 +122,13 @@ static int read_stage1_command(uint8_t *buffer, uint32_t length)
         return -1;
     }
     usbip_stage1_header *req = (usbip_stage1_header *)buffer;
-    return (ntohs(req->command) & 0xFF); // 0x80xx low bit
+    uint16_t cmd_raw = req->command;
+    int cmd = (int)(ntohs(req->command) & 0xFF);
+    os_printf("read_stage1_command: raw=0x%04X ret=0x%02X buf=%02X%02X%02X%02X%02X%02X%02X%02X\r\n",
+              (unsigned)cmd_raw, (unsigned)cmd,
+              buffer[0], buffer[1], buffer[2], buffer[3],
+              buffer[4], buffer[5], buffer[6], buffer[7]);
+    return cmd;
 }
 
 static void handle_device_list(uint8_t *buffer, uint32_t length)
@@ -110,7 +158,7 @@ static void handle_device_attach(uint8_t *buffer, uint32_t length)
 static void send_stage1_header(uint16_t command, uint32_t status)
 {
     os_printf("Sending header...\r\n");
-    usbip_stage1_header header;
+    usbip_stage1_header header = {0};
     header.version = htons(273); ////TODO:  273???
     // may be : https://github.com/Oxalin/usbip_windows/issues/4
 
@@ -126,7 +174,7 @@ static void send_device_list()
 
     // send device list size:
     os_printf("Sending device list size...\r\n");
-    usbip_stage1_response_devlist response_devlist;
+    usbip_stage1_response_devlist response_devlist = {0};
 
     // we have only 1 device, so:
     response_devlist.list_size = htonl(1);
@@ -146,14 +194,14 @@ static void send_device_list()
 static void send_device_info()
 {
     os_printf("Sending device info...\r\n");
-    usbip_stage1_usb_device device;
+    usbip_stage1_usb_device device = {0};
 
     strcpy(device.path, "/sys/devices/pci0000:00/0000:00:01.2/usb1/1-1");
     strcpy(device.busid, "1-1");
 
     device.busnum = htonl(1);
     device.devnum = htonl(1);
-    device.speed = htonl(3); // See usb_device_speed enum
+    device.speed = htonl(2); // USB_SPEED_FULL (12 Mbps).  WiFi cannot sustain High Speed.
 
     device.idVendor = htons(USBD0_DEV_DESC_IDVENDOR);
     device.idProduct = htons(USBD0_DEV_DESC_IDPRODUCT);
@@ -173,7 +221,7 @@ static void send_device_info()
 static void send_interface_info()
 {
     os_printf("Sending interface info...\r\n");
-    usbip_stage1_usb_interface interface;
+    usbip_stage1_usb_interface interface = {0};
     interface.bInterfaceClass = USBD_CUSTOM_CLASS0_IF0_CLASS;
     interface.bInterfaceSubClass = USBD_CUSTOM_CLASS0_IF0_SUBCLASS;
     interface.bInterfaceProtocol = USBD_CUSTOM_CLASS0_IF0_PROTOCOL;
@@ -191,6 +239,7 @@ static int usbip_urb_process(uint8_t *base, uint32_t length)
     bool may_has_data;
     int sz, ret;
     int dap_req_num = 0;
+    uint32_t ep_data_length = 0;
 
     while (1) {
         // header
@@ -208,7 +257,8 @@ static int usbip_urb_process(uint8_t *base, uint32_t length)
         dir = ntohl(header->base.direction);
         ep = ntohl(header->base.ep);
         may_has_data = (command == USBIP_STAGE2_REQ_SUBMIT && dir == USBIP_DIR_OUT);
-        sz = may_has_data ? ntohl(header->u.cmd_submit.data_length) : 0;
+        ep_data_length = may_has_data ? ntohl(header->u.cmd_submit.data_length) : 0;
+        sz = (int)ep_data_length;
 
         while (sz) {
                 ret = recv(kSock, data, sz, 0);
@@ -220,14 +270,41 @@ static int usbip_urb_process(uint8_t *base, uint32_t length)
 
         if (likely(command == USBIP_STAGE2_REQ_SUBMIT)) {
             if (likely(ep == 1 && dir == USBIP_DIR_IN)) {
-                fast_reply(base, sizeof(usbip_stage2_header), dap_req_num);
-                if (dap_req_num > 0)
-                    dap_req_num--;
+                if (dap_req_num > 0) {
+                    int fr = fast_reply(base, sizeof(usbip_stage2_header), dap_req_num);
+                    if (fr) {
+                        dap_req_num--;
+                    } else {
+                        save_in_header(header);
+                    }
+                } else {
+                    // No OUT pending yet (flush read from start_rx() or race).
+                    // Return an empty ACK immediately so the host does not
+                    // timeout and UNLINK.  With the pyusb_v2_backend patch
+                    // OUT now arrives before IN for real commands.
+                    fast_reply(base, sizeof(usbip_stage2_header), 0);
+                }
             } else if (likely(ep == 1 && dir == USBIP_DIR_OUT)) {
                 dap_req_num++;
-                handle_dap_data_request(header, length);
+                handle_dap_data_request(header, ep_data_length);
             } else if (ep == 0) {
                 unpack(base, sizeof(usbip_stage2_header));
+#if (USBIP_DEBUG_VERBOSE == 1)
+                os_printf("EP0_REQ seq=%lu dir=%lu ep=%lu len=%ld type=%02X req=%02X wValue=%02X%02X wIndex=%02X%02X wLength=%02X%02X\r\n",
+                          (unsigned long)header->base.seqnum,
+                          (unsigned long)header->base.direction,
+                          (unsigned long)header->base.ep,
+                          (long)header->u.cmd_submit.data_length,
+                          header->u.cmd_submit.request.bmRequestType,
+                          header->u.cmd_submit.request.bRequest,
+                          header->u.cmd_submit.request.wValue.u8hi,
+                          header->u.cmd_submit.request.wValue.u8lo,
+                          header->u.cmd_submit.request.wIndex.u8hi,
+                          header->u.cmd_submit.request.wIndex.u8lo,
+                          header->u.cmd_submit.request.wLength.u8hi,
+                          header->u.cmd_submit.request.wLength.u8lo);
+                debug_dump_usbip_header("EP0_REQ_HDR", header);
+#endif
                 handleUSBControlRequest(header);
             } else {
                 // ep3 reserved for SWO
@@ -244,6 +321,16 @@ static int usbip_urb_process(uint8_t *base, uint32_t length)
             os_printf("emulate unknown command:%d\r\n", command);
             return -1;
         }
+
+        if (has_pending_in() && dap_req_num > 0) {
+            usbip_stage2_header saved_header;
+            if (peek_oldest_in_header(&saved_header)) {
+                if (fast_reply((uint8_t *)&saved_header, sizeof(usbip_stage2_header), dap_req_num)) {
+                    dap_req_num--;
+                    get_oldest_in_header(&saved_header); // consume it
+                }
+            }
+        }
     }
 
 out:
@@ -258,6 +345,8 @@ int usbip_worker(uint8_t *base, uint32_t length, enum usbip_server_state_t *stat
     int pre_read_sz = 4;
     int sz, ret;
 
+    os_printf("usbip_worker enter state=%d\r\n", (int)*state);
+
     // OP_REQ_DEVLIST status field
     if (*state == WAIT_DEVLIST) {
         data = base + 4;
@@ -270,6 +359,7 @@ int usbip_worker(uint8_t *base, uint32_t length, enum usbip_server_state_t *stat
             data += ret;
         } while (sz > 0);
 
+        os_printf("usbip_worker calling attach(base,8)\r\n");
         ret = attach(base, 8);
         if (ret)
             return ret;
@@ -289,6 +379,7 @@ int usbip_worker(uint8_t *base, uint32_t length, enum usbip_server_state_t *stat
         data += ret;
     } while (sz > 0);
 
+    os_printf("usbip_worker calling attach(base,40)\r\n");
     ret = attach(base, 40);
     if (ret)
         return ret;
@@ -353,28 +444,72 @@ static void unpack(void *data, int size)
 
 void send_stage2_submit(usbip_stage2_header *req_header, int32_t status, int32_t data_length)
 {
+    uint32_t request_devid = req_header->base.devid;
+    uint32_t request_direction = req_header->base.direction;
+    uint32_t request_ep = req_header->base.ep;
 
     req_header->base.command = USBIP_STAGE2_RSP_SUBMIT;
-    req_header->base.direction = !(req_header->base.direction);
+    req_header->base.devid = request_devid;
+    req_header->base.direction = !request_direction;
+    req_header->base.ep = request_ep;
 
-    memset(&(req_header->u.ret_submit), 0, sizeof(usbip_stage2_header_ret_submit));
+    memset(&(req_header->u), 0, sizeof(req_header->u));
 
     req_header->u.ret_submit.status = status;
     req_header->u.ret_submit.data_length = data_length;
+    req_header->u.ret_submit.number_of_packets = 0;
     // already unpacked
     pack(req_header, sizeof(usbip_stage2_header));
+
+#if (USBIP_DEBUG_VERBOSE == 1)
+    if (ntohl(req_header->base.seqnum) != 0) {
+        os_printf("RET_SUBMIT seq=%lu status=%ld len=%ld\r\n",
+                  (unsigned long)ntohl(req_header->base.seqnum),
+                  (long)status,
+                  (long)data_length);
+        debug_dump_usbip_header("RET_SUBMIT_HDR", req_header);
+    }
+#endif
+
     usbip_network_send(kSock, req_header, sizeof(usbip_stage2_header), 0);
 }
 
 void send_stage2_submit_data(usbip_stage2_header *req_header, int32_t status, const void *const data, int32_t data_length)
 {
+    uint8_t send_buf[sizeof(usbip_stage2_header) + 512];
+    size_t total_len = sizeof(usbip_stage2_header);
 
-    send_stage2_submit(req_header, status, data_length);
+    // Setup header (same logic as send_stage2_submit)
+    uint32_t request_devid = req_header->base.devid;
+    uint32_t request_direction = req_header->base.direction;
+    uint32_t request_ep = req_header->base.ep;
 
-    if (data_length)
-    {
-        usbip_network_send(kSock, data, data_length, 0);
+    req_header->base.command = USBIP_STAGE2_RSP_SUBMIT;
+    req_header->base.devid = request_devid;
+    req_header->base.direction = !request_direction;
+    req_header->base.ep = request_ep;
+
+    memset(&(req_header->u), 0, sizeof(req_header->u));
+
+    req_header->u.ret_submit.status = status;
+    req_header->u.ret_submit.data_length = data_length;
+    req_header->u.ret_submit.number_of_packets = 0;
+
+    pack(req_header, sizeof(usbip_stage2_header));
+
+    // Copy header + data into single buffer to avoid split-send latency
+    memcpy(send_buf, req_header, sizeof(usbip_stage2_header));
+    if (data && data_length > 0) {
+        int32_t copy_len = data_length;
+        if (copy_len > 512) {
+            os_printf("WARN: send_stage2_submit_data len=%d > 512, truncating!\r\n", copy_len);
+            copy_len = 512;
+        }
+        memcpy(send_buf + sizeof(usbip_stage2_header), data, copy_len);
+        total_len += copy_len;
     }
+
+    usbip_network_send(kSock, send_buf, total_len, 0);
 }
 
 void send_stage2_submit_data_fast(usbip_stage2_header *req_header, const void *const data, int32_t data_length)
@@ -382,39 +517,63 @@ void send_stage2_submit_data_fast(usbip_stage2_header *req_header, const void *c
     uint8_t * send_buf = (uint8_t *)req_header;
 
     req_header->base.command = PP_HTONL(USBIP_STAGE2_RSP_SUBMIT);
+    // On little-endian CPUs htonl(!x) with network-byte-order x happens to
+    // produce the correct flipped network-byte-order value, which is what the
+    // original upstream code relied on.  Preserve that behaviour.
     req_header->base.direction = htonl(!(req_header->base.direction));
 
-    memset(&(req_header->u.ret_submit), 0, sizeof(usbip_stage2_header_ret_submit));
+    memset(&(req_header->u), 0, sizeof(req_header->u));
+    req_header->u.ret_submit.status = PP_HTONL(0);
     req_header->u.ret_submit.data_length = htonl(data_length);
+    req_header->u.ret_submit.number_of_packets = htonl(0);
 
     // payload
     if (data)
         memcpy(&send_buf[sizeof(usbip_stage2_header)], data, data_length);
-    usbip_network_send(kSock, send_buf, sizeof(usbip_stage2_header) + data_length, 0);
+
+#if (USBIP_DEBUG_VERBOSE == 1)
+    if (ntohl(req_header->base.seqnum) != 0) {
+        os_printf("RET_SUBMIT_FAST seq=%lu len=%ld\r\n",
+                  (unsigned long)ntohl(req_header->base.seqnum),
+                  (long)data_length);
+        debug_dump_usbip_header("RET_FAST_HDR", req_header);
+        if (data) {
+            size_t dump_len = ((size_t)data_length > 32U) ? 32U : (size_t)data_length;
+            debug_dump_bytes("RET_FAST_DATA", (const uint8_t *)data, dump_len);
+        }
+    }
+#endif
+
+    int sent = usbip_network_send(kSock, send_buf, sizeof(usbip_stage2_header) + data_length, 0);
+    os_printf("fast_send ret=%d len=%d\r\n", sent, (int)(sizeof(usbip_stage2_header) + data_length));
 }
 
 
 static void handle_unlink(usbip_stage2_header *header)
 {
-    handle_dap_unlink();
+    uint32_t unlink_seqnum = ntohl(header->u.cmd_unlink.seqnum);
+    handle_dap_unlink(unlink_seqnum);
     send_stage2_unlink(header);
 }
 
 static void send_stage2_unlink(usbip_stage2_header *req_header)
 {
-
     req_header->base.command = USBIP_STAGE2_RSP_UNLINK;
+    // usbip-win2 expects direction = USBIP_DIR_OUT in RET_UNLINK, matching original upstream
     req_header->base.direction = USBIP_DIR_OUT;
 
-    memset(&(req_header->u.ret_unlink), 0, sizeof(usbip_stage2_header_ret_unlink));
+    memset(&(req_header->u), 0, sizeof(req_header->u));
 
-    // To be more precise, the value is `-ECONNRESET`, but usbip-win only cares if it is a
-    // non zero value. A non-zero value indicates that our UNLINK operation was "successful",
-    // but the host driver's may behave differently, or may even ignore this state. For consistent
-    // behavior, we use non-zero value here. See also comments regarding `handle_dap_unlink()`.
+    // usbip-win2 treats any non-zero status as "unlink succeeded".
+    // The precise value is -ECONNRESET, but -1 is sufficient and matches original code.
     req_header->u.ret_unlink.status = -1;
 
     pack(req_header, sizeof(usbip_stage2_header));
+
+    os_printf("RET_UNLINK seq=%lu status=%ld\r\n",
+              (unsigned long)ntohl(req_header->base.seqnum),
+              (long)-1);
+    debug_dump_usbip_header("RET_UNLINK_HDR", req_header);
 
     usbip_network_send(kSock, req_header, sizeof(usbip_stage2_header), 0);
 }

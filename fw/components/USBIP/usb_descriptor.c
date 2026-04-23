@@ -88,7 +88,7 @@ const uint8_t kUSBd0InterfaceDescriptor[]=
      * pyOCD identifies the debugger by USB interface name, which include substring "CMSIS-DAP".
      * See `strings_list` in `usb_handle.c`
      */
-    0x02,                                   // iInterface
+    0x04,                                   // iInterface
                                             // Index of string descriptor describing this interface
 
     // Standard Endpoint Descriptor
@@ -309,41 +309,37 @@ const uint8_t kLangDescriptor[0x04] =
  *
  */
 
-const uint8_t kManufacturerString[0x28] =
+const uint8_t kManufacturerString[0x08] =
 {
-    0x28, // bLength
+    0x08, // bLength
     0x03, // bDescriptorType
-    // "KEIL - Tools By ARM"
-    'K', 0, 'E', 0, 'I', 0, 'L', 0, ' ', 0, '-', 0, ' ', 0, 'T', 0, 'o', 0, 'o', 0,
-    'l', 0, 's', 0, ' ', 0, 'B', 0, 'y', 0, ' ', 0, 'A', 0, 'R', 0, 'M', 0
+    // "ARM"
+    'A', 0, 'R', 0, 'M', 0
 };
 
-const uint8_t kProductString[0x18] =
+const uint8_t kProductString[0x14] =
 {
-    0x18, // bLength
+    0x14, // bLength
     0x03, // bDescriptorType
-    // "LPC-Link-II"
-    'L', 0, 'P', 0, 'C', 0, '-', 0, 'L', 0, 'i', 0, 'n', 0, 'k', 0, '-', 0, 'I', 0,
-    'I', 0
+    // "CMSIS-DAP"
+    'C', 0, 'M', 0, 'S', 0, 'I', 0, 'S', 0, '-', 0, 'D', 0, 'A', 0, 'P', 0
 };
 
 const uint8_t kSerialNumberString[0x1A] =
 {
     0x1A, // bLength
     0x03, // bDescriptorType
-    // "0001A0000000"
-    '0', 0, '0', 0, '0', 0, '1', 0, 'A', 0, '0', 0, '0', 0, '0', 0, '0', 0, '0', 0,
+    // "000000000000"
+    '0', 0, '0', 0, '0', 0, '0', 0, '0', 0, '0', 0, '0', 0, '0', 0, '0', 0, '0', 0,
     '0', 0, '0', 0
 };
 
-const uint8_t kInterfaceString[0x2C] =
+const uint8_t kInterfaceString[0x14] =
 {
-    0x2C, // bLength
+    0x14, // bLength
     0x03, // bDescriptorType
-    // "LPC-Link-II CMSIS-DAP"
-    'L', 0, 'P', 0, 'C', 0, '-', 0, 'L', 0, 'i', 0, 'n', 0, 'k', 0, '-', 0, 'I', 0,
-    'I', 0, ' ', 0, 'C', 0, 'M', 0, 'S', 0, 'I', 0, 'S', 0, '-', 0, 'D', 0, 'A', 0,
-    'P', 0
+    // "CMSIS-DAP"
+    'C', 0, 'M', 0, 'S', 0, 'I', 0, 'S', 0, '-', 0, 'D', 0, 'A', 0, 'P', 0
 };
 
 const uint8_t * const kUSBd0StringDescriptorsSet[0x05] =
