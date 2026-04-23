@@ -21,4 +21,5 @@ idf_component_register(
         "lwip"
         "DAP"
         "USBIP"
+        "elaphureLink"
 )

@@ -15,6 +15,8 @@
 #include "main/usbip_server.h"
 #include "main/DAP_handle.h"
 
+#include "components/elaphureLink/elaphureLink_protocol.h"
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
@@ -125,9 +127,14 @@ void tcp_server_task(void *pvParameters)
 
             header = *((int *)(tcp_rx_buffer));
             header = ntohl(header);
+            os_printf("tcp_server header=0x%08X low=0x%04X buf=%02X%02X%02X%02X\r\n",
+                      (unsigned)header, (unsigned)(header & 0xFFFF),
+                      tcp_rx_buffer[0], tcp_rx_buffer[1], tcp_rx_buffer[2], tcp_rx_buffer[3]);
 
-            if ((header & 0xFFFF) == 0x8003 ||
-                (header & 0xFFFF) == 0x8005) { // usbip OP_REQ_DEVLIST/OP_REQ_IMPORT
+            if (header == EL_LINK_IDENTIFIER) {
+                el_dap_work(tcp_rx_buffer, sizeof(tcp_rx_buffer));
+            } else if ((header & 0xFFFF) == 0x8003 ||
+                       (header & 0xFFFF) == 0x8005) { // usbip OP_REQ_DEVLIST/OP_REQ_IMPORT
                 if ((header & 0xFFFF) == 0x8005)
                     usbip_state = WAIT_DEVLIST;
                 else
@@ -143,6 +150,8 @@ cleanup:
                 os_printf("Shutting down socket and restarting...\r\n");
                 //shutdown(kSock, 0);
                 close(kSock);
+
+                el_process_buffer_free();
 
                 // Restart DAP Handle
                 kRestartDAPHandle = RESET_HANDLE;

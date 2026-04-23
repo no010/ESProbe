@@ -78,11 +78,11 @@ void app_main() {
 #endif
 
     // BSD socket TCP server for USBIP
-    xTaskCreatePinnedToCore(tcp_server_task, "tcp_server", 4096, NULL, 14, NULL,
+    xTaskCreatePinnedToCore(tcp_server_task, "tcp_server", 8192, NULL, 14, NULL,
                             DAP_TASK_AFFINITY);
 
     // DAP handle task
-    xTaskCreatePinnedToCore(DAP_Thread, "DAP_Task", 2048, NULL, 10, &kDAPTaskHandle,
+    xTaskCreatePinnedToCore(DAP_Thread, "DAP_Task", 8192, NULL, 10, &kDAPTaskHandle,
                             DAP_TASK_AFFINITY);
 
 #if defined CONFIG_IDF_TARGET_ESP8266
