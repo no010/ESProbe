@@ -17,4 +17,33 @@ menu "wireless dap config"
             string "WiFi Password 2"
             default "12345678"
     endmenu
+
+    menu "AP Fallback"
+        config USE_AP_FALLBACK
+            bool "Enable AP fallback when STA fails"
+            default y
+            help
+                When STA connection fails after the configured number of
+                retries, the device switches to AP mode so the host can
+                connect directly.
+
+        config AP_FALLBACK_MAX_RETRIES
+            int "Max STA retry count before AP fallback"
+            default 10
+            range 3 100
+            depends on USE_AP_FALLBACK
+
+        config AP_SSID_PREFIX
+            string "AP SSID prefix"
+            default "ESProbe"
+            depends on USE_AP_FALLBACK
+            help
+                The AP SSID will be this prefix followed by the last 2
+                bytes of the MAC address, e.g. "ESProbe-A1B2".
+
+        config AP_PASSWORD
+            string "AP password (empty for open AP)"
+            default ""
+            depends on USE_AP_FALLBACK
+    endmenu
 endmenu

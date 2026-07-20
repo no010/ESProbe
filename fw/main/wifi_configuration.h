@@ -36,6 +36,24 @@ static struct {
 
 #define USE_OTA              0
 
+// --- WiFi AP Fallback ---
+// When STA connection fails after MAX_RETRIES attempts, the device
+// switches to AP mode so the host can connect directly.
+// Configurable via menuconfig (AP Fallback menu).
+#ifdef CONFIG_USE_AP_FALLBACK
+#define USE_AP_FALLBACK      1
+#else
+#define USE_AP_FALLBACK      0
+#endif
+#ifdef CONFIG_AP_FALLBACK_MAX_RETRIES
+#define AP_FALLBACK_MAX_RETRIES  CONFIG_AP_FALLBACK_MAX_RETRIES
+#else
+#define AP_FALLBACK_MAX_RETRIES  10
+#endif
+#define AP_SSID_PREFIX       CONFIG_AP_SSID_PREFIX
+#define AP_PASSWORD          CONFIG_AP_PASSWORD
+#define AP_CHANNEL           1
+
 #define USE_UART_BRIDGE      1
 #define UART_BRIDGE_PORT     1234
 #define UART_BRIDGE_BAUDRATE 115200

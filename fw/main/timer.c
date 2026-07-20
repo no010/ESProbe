@@ -16,6 +16,8 @@
 
 #ifdef CONFIG_IDF_TARGET_ESP8266
     #include "hw_timer.h"
+#else
+    #include "esp_timer.h"
 #endif
 
 #include "freertos/FreeRTOS.h"
@@ -56,7 +58,9 @@ uint32_t get_timer_count()
 #ifdef CONFIG_IDF_TARGET_ESP8266
     return (uint32_t)frc2->count.data;
 #elif defined CONFIG_IDF_TARGET_ESP32 || defined CONFIG_IDF_TARGET_ESP32C3 || defined CONFIG_IDF_TARGET_ESP32S3
-    return 0;
+    // Use ESP-IDF's microsecond timer. Overflows every ~71 minutes (2^32 us),
+    // which is acceptable for DAP timestamp use (test-domain timer for SWO/trace).
+    return (uint32_t)esp_timer_get_time();
 #else
     #error unknown hardware
 #endif

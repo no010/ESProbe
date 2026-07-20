@@ -11,6 +11,8 @@
 #include "main/timer.h"
 #include "main/wifi_configuration.h"
 #include "main/wifi_handle.h"
+#include "main/led_status.h"
+#include "main/button_handle.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -66,12 +68,18 @@ void mdns_setup() {
 void app_main() {
     ESP_ERROR_CHECK(nvs_flash_init());
 
+    // LED status indicator starts in BOOTING state.
+    led_status_init();
+
 #if (USE_UART_BRIDGE == 1)
     uart_bridge_init();
 #endif
     wifi_init();
     DAP_Setup();
     timer_init();
+
+    // BOOT button: long-press = clear WiFi creds, short-press = target nRESET.
+    button_handle_init();
 
 #if (USE_MDNS == 1)
     mdns_setup();

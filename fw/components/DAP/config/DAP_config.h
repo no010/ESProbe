@@ -174,8 +174,8 @@ This information includes:
 #define SWO_STREAM SWO_FUNCTION_ENABLE ///< SWO Streaming Trace: 1 = available, 0 = not available.
 
 /// Clock frequency of the Test Domain Timer. Timer value is returned with \ref TIMESTAMP_GET.
-#define TIMESTAMP_CLOCK 5000000U ///< Timestamp clock in Hz (0 = timestamps not supported).
-// <<<<<<<<<<<<<<<<<<<<<5MHz
+#define TIMESTAMP_CLOCK 1000000U ///< Timestamp clock in Hz (0 = timestamps not supported).
+// Matches esp_timer_get_time() microsecond resolution.
 
 /// Indicate that UART Communication Port is available.
 /// This information is returned by the command \ref DAP_Info as part of <b>Capabilities</b>.
@@ -338,8 +338,8 @@ __STATIC_INLINE uint8_t DAP_GetTargetBoardNameString (char *str) {
  * @return String length (including terminating NULL character) or 0 (no string).
  */
 __STATIC_INLINE uint8_t DAP_GetProductFirmwareVersionString (char *str) {
-  (void)str;
-  return (0U);
+  strcpy(str, ESPROBE_FW_VERSION);
+  return (sizeof(ESPROBE_FW_VERSION));
 }
 
 ///@}

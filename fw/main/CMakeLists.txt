@@ -7,6 +7,9 @@ idf_component_register(
         "DAP_handle.c"
         "uart_bridge.c"
         "wifi_handle.c"
+        "led_status.c"
+        "button_handle.c"
+        "wifi_config_store.c"
     INCLUDE_DIRS
         "."
         ".."

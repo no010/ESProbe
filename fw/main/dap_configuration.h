@@ -2,6 +2,14 @@
 #define __DAP_CONFIGURATION_H__
 
 /**
+ * @brief ESProbe firmware version string.
+ *
+ * Returned to host via DAP_Info(ID_DAP_Info_FW_Ver) so debuggers
+ * (Keil, pyOCD, OpenOCD) can display the probe firmware version.
+ */
+#define ESPROBE_FW_VERSION "1.0.0"
+
+/**
  * @brief Specify the use of WINUSB
  *
  */
