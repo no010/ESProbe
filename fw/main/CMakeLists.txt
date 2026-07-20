@@ -10,6 +10,7 @@ idf_component_register(
         "led_status.c"
         "button_handle.c"
         "wifi_config_store.c"
+        "web_server.c"
     INCLUDE_DIRS
         "."
         ".."
@@ -22,6 +23,9 @@ idf_component_register(
         "mdns"
         "freertos"
         "lwip"
+        "esp_http_server"
+        "app_update"
+        "esp_timer"
         "DAP"
         "USBIP"
         "elaphureLink"

@@ -8,6 +8,7 @@ idf_component_register(
         ".."
     REQUIRES
         "lwip"
+        "esp_hw_support"
     PRIV_REQUIRES
         "main"
 )

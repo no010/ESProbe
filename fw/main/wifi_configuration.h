@@ -59,6 +59,9 @@ static struct {
 #define UART_BRIDGE_BAUDRATE 115200
 //
 
+// HTTP config portal + status + OTA server on port 80.
+#define USE_WEB_SERVER       1
+
 // DO NOT CHANGE
 #define USE_TCP_NETCONN 0
 

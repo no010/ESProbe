@@ -13,6 +13,9 @@
 #include "main/wifi_handle.h"
 #include "main/led_status.h"
 #include "main/button_handle.h"
+#include "main/web_server.h"
+#include "main/dap_configuration.h"
+#include "components/USBIP/usb_descriptor.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -63,6 +66,26 @@ void mdns_setup() {
         return;
     }
     ESP_LOGI(MDNS_TAG, "mDNS instance name set to: [%s]", MDNS_INSTANCE);
+
+    // Advertise the CMSIS-DAP / USBIP service (_dap._tcp on port 3240) with
+    // TXT metadata so discovery tools can display device details.
+    mdns_txt_item_t dap_txt[] = {
+        {"fw", ESPROBE_FW_VERSION},
+        {"device", "ESProbe"},
+        {"proto", "usbip+elaphurelink"},
+        {"uart_port", "1234"},
+    };
+    ret = mdns_service_add("ESProbe DAP", "_dap", "_tcp", PORT,
+                           dap_txt, sizeof(dap_txt) / sizeof(dap_txt[0]));
+    if (ret != ESP_OK) {
+        ESP_LOGW(MDNS_TAG, "mDNS add _dap service failed:%d", ret);
+    }
+
+    // Advertise the web config/OTA portal (_http._tcp on port 80).
+    ret = mdns_service_add("ESProbe Web", "_http", "_tcp", 80, NULL, 0);
+    if (ret != ESP_OK) {
+        ESP_LOGW(MDNS_TAG, "mDNS add _http service failed:%d", ret);
+    }
 }
 
 void app_main() {
@@ -70,6 +93,10 @@ void app_main() {
 
     // LED status indicator starts in BOOTING state.
     led_status_init();
+
+    // Generate the USB serial number descriptor from the device MAC so that
+    // multiple probes on the same network are distinguishable.
+    usb_descriptor_set_serial_from_mac();
 
 #if (USE_UART_BRIDGE == 1)
     uart_bridge_init();
@@ -83,6 +110,11 @@ void app_main() {
 
 #if (USE_MDNS == 1)
     mdns_setup();
+#endif
+
+#if (USE_WEB_SERVER == 1)
+    // HTTP config portal + status + OTA (port 80), works in STA and AP mode.
+    web_server_start();
 #endif
 
     // BSD socket TCP server for USBIP

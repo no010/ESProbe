@@ -48,7 +48,12 @@ extern const uint8_t kUSBd0DeviceDescriptor[0x12];
 extern const uint8_t kLangDescriptor[0x04];
 extern const uint8_t kManufacturerString[0x08];
 extern const uint8_t kProductString[0x14];
-extern const uint8_t kSerialNumberString[0x1A];
+// Serial number is filled from the MAC address at boot (non-const).
+extern uint8_t kSerialNumberString[0x1A];
+
+// Populate kSerialNumberString from the device MAC address. Call once at boot
+// before the USBIP server starts serving descriptors.
+void usb_descriptor_set_serial_from_mac(void);
 
 #if (USE_WINUSB == 1)
 

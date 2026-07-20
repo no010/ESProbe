@@ -15,6 +15,8 @@
 #include "components/USBIP/usb_descriptor.h"
 #include "components/USBIP/usb_defs.h"
 
+#include "esp_mac.h"
+
 #define USBShort(ui16Value)     ((ui16Value) & 0xff), ((ui16Value) >> 8)
 
 
@@ -325,14 +327,37 @@ const uint8_t kProductString[0x14] =
     'C', 0, 'M', 0, 'S', 0, 'I', 0, 'S', 0, '-', 0, 'D', 0, 'A', 0, 'P', 0
 };
 
-const uint8_t kSerialNumberString[0x1A] =
+// Serial number string descriptor. Filled from the MAC address at boot by
+// usb_descriptor_set_serial_from_mac(). 6 MAC bytes -> 12 hex chars, which
+// fits exactly in this fixed 0x1A-byte (2 header + 12*2 UTF-16) descriptor.
+uint8_t kSerialNumberString[0x1A] =
 {
     0x1A, // bLength
     0x03, // bDescriptorType
-    // "000000000000"
+    // "000000000000" (placeholder, overwritten at boot)
     '0', 0, '0', 0, '0', 0, '0', 0, '0', 0, '0', 0, '0', 0, '0', 0, '0', 0, '0', 0,
     '0', 0, '0', 0
 };
+
+void usb_descriptor_set_serial_from_mac(void)
+{
+    static const char hex[] = "0123456789ABCDEF";
+    uint8_t mac[6];
+
+    if (esp_read_mac(mac, ESP_MAC_WIFI_STA) != 0) {
+        return; // keep placeholder on failure
+    }
+
+    // 6 MAC bytes -> 12 hex chars. UTF-16LE: char c at byte offset 2 + c*2.
+    for (int i = 0; i < 6; i++) {
+        int hi = (i * 2);       // high nibble char index
+        int lo = (i * 2) + 1;   // low nibble char index
+        kSerialNumberString[2 + hi * 2]     = (uint8_t)hex[(mac[i] >> 4) & 0x0F];
+        kSerialNumberString[2 + hi * 2 + 1] = 0;
+        kSerialNumberString[2 + lo * 2]     = (uint8_t)hex[mac[i] & 0x0F];
+        kSerialNumberString[2 + lo * 2 + 1] = 0;
+    }
+}
 
 const uint8_t kInterfaceString[0x14] =
 {

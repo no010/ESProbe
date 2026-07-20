@@ -46,6 +46,11 @@ const int IPV6_GOTIP_BIT = BIT2;
 static void ssid_change(void);
 static void start_ap_mode(void);
 
+bool wifi_is_ap_mode(void)
+{
+    return s_ap_mode_active;
+}
+
 static void event_handler(void *arg, esp_event_base_t event_base,
                           int32_t event_id, void *event_data)
 {
@@ -138,7 +143,7 @@ static void start_ap_mode(void)
 
     // Stop STA and switch to AP.
     esp_err_t err = esp_wifi_disconnect();
-    if (err != ESP_OK && err != ESP_ERR_WIFI_NOT_CONNECTED) {
+    if (err != ESP_OK && err != ESP_ERR_WIFI_NOT_CONNECT) {
         ESP_LOGE(TAG, "esp_wifi_disconnect failed: %s", esp_err_to_name(err));
     }
 
@@ -165,8 +170,14 @@ static void start_ap_mode(void)
             .authmode = WIFI_AUTH_OPEN,
         },
     };
-    strncpy((char *)ap_config.ap.ssid, ap_ssid, sizeof(ap_config.ap.ssid) - 1);
-    ap_config.ap.ssid_len = strlen(ap_ssid);
+    // Copy the generated SSID into the config, bounded and NUL-terminated.
+    size_t ssid_len = strlen(ap_ssid);
+    if (ssid_len >= sizeof(ap_config.ap.ssid)) {
+        ssid_len = sizeof(ap_config.ap.ssid) - 1;
+    }
+    memcpy(ap_config.ap.ssid, ap_ssid, ssid_len);
+    ap_config.ap.ssid[ssid_len] = '\0';
+    ap_config.ap.ssid_len = ssid_len;
 
     // Set auth mode based on whether password is set.
     if (strlen(AP_PASSWORD) > 0) {
