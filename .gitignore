@@ -1,7 +1,9 @@
 *_backup
 .DS_Store
-.agents
 .vscode
 .openocd
 blink
 hello_world
+videos/
+.qoder/
+.agents/skills/*.skill
