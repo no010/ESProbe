@@ -1,0 +1,264 @@
+<svg viewBox="0 0 1200 900" xmlns="http://www.w3.org/2000/svg" style="background-color: #F8FAFC; font-family: 'Inter', system-ui, -apple-system, sans-serif;">
+    <defs>
+        <!-- 模块阴影 -->
+        <filter id="shadow-sm" x="-8%" y="-8%" width="116%" height="116%">
+            <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.06" />
+        </filter>
+        <filter id="shadow-md" x="-8%" y="-8%" width="116%" height="116%">
+            <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#0F172A" flood-opacity="0.08" />
+        </filter>
+        
+        <!-- 模块渐变头部 -->
+        <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.98" />
+            <stop offset="100%" stop-color="#F1F5F9" stop-opacity="0.98" />
+        </linearGradient>
+
+        <!-- 主控芯片渐变 -->
+        <linearGradient id="chipGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#1E293B" />
+            <stop offset="100%" stop-color="#0F172A" />
+        </linearGradient>
+
+        <!-- 背景网格 -->
+        <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+            <circle cx="2" cy="2" r="1.2" fill="#CBD5E1" opacity="0.3" />
+        </pattern>
+    </defs>
+
+    <!-- 背景 -->
+    <rect width="1200" height="900" fill="#F8FAFC" />
+    <rect width="1200" height="900" fill="url(#grid)" />
+
+    <!-- 标题区 -->
+    <g transform="translate(100, 40)">
+        <text x="500" y="24" text-anchor="middle" font-size="26" font-weight="800" fill="#1E293B" letter-spacing="-0.5">ESProbe v1.0A — 引脚功能与接口示意图</text>
+        <text x="500" y="50" text-anchor="middle" font-size="14" fill="#64748B" font-weight="500">基于 ESP32-C3-WROOM-02 无线模组 | 模块化总线布局 / 同色单线连接</text>
+        <rect x="180" y="65" width="640" height="2" fill="#E2E8F0" rx="1" />
+    </g>
+
+    <!-- 连线层（置于组件底层，使用粗总线样式） -->
+    
+    <!-- 1. 扩展及保护模块（叶绿色） -->
+    <g fill="none" stroke="#10B981" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" opacity="0.85">
+        <!-- 主控左侧 IO4/5/6/7/2/10 汇聚总线 → 扩展模块 -->
+        <path d="M 400 305 L 340 305 L 340 180 L 260 180" />
+    </g>
+
+    <!-- 2. 用户按键模块（珊瑚橙） -->
+    <g fill="none" stroke="#F97316" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" opacity="0.85">
+        <!-- 主控左侧 IO9 → 按键模块 -->
+        <path d="M 400 348 L 320 348 L 320 565 L 260 565" />
+    </g>
+
+    <!-- 3. 电源管理模块（琥珀金） -->
+    <g fill="none" stroke="#F59E0B" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" opacity="0.85">
+        <!-- 主控右侧 3V3 / EN / IO3 汇聚总线 → 电源模块 -->
+        <path d="M 740 300 L 800 300 L 800 175 L 900 175" />
+    </g>
+
+    <!-- 4. USB 接口模块（天蓝色） -->
+    <g fill="none" stroke="#3B82F6" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" opacity="0.85">
+        <!-- 主控右侧 IO18/IO19 → USB 模块 -->
+        <path d="M 740 318 L 860 318 L 860 380 L 900 380" />
+    </g>
+
+    <!-- 5. LED 指示灯模块（玫瑰红） -->
+    <g fill="none" stroke="#E11D48" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" opacity="0.85">
+        <!-- 主控右侧 IO0 → LED 模块 -->
+        <path d="M 740 348 L 830 348 L 830 520 L 900 520" />
+    </g>
+
+    <!-- 6. 调试测试点模块（紫色） -->
+    <g fill="none" stroke="#8B5CF6" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" opacity="0.85" stroke-dasharray="6 4">
+        <!-- 主控右侧 TXD0/RXD0 + 其他测试信号汇聚总线 → 测试点模块 -->
+        <path d="M 740 378 L 790 378 L 790 720 L 600 720" />
+    </g>
+
+    <!-- ==================== 各模块框体 ==================== -->
+
+    <!-- 左侧模块组 -->
+    
+    <!-- 扩展及保护模块（CN1 + ESD 合并为一个大模块） -->
+    <g transform="translate(60, 140)" filter="url(#shadow-md)">
+        <rect width="220" height="340" rx="20" fill="#FFFFFF" stroke="#10B981" stroke-width="2" />
+        <rect width="220" height="48" rx="20" fill="#F0FDF4" stroke="none" />
+        <path d="M 0 20 Q 0 0 20 0 L 200 0 Q 220 0 220 20 L 220 48 L 0 48 Z" fill="#ECFDF5" />
+        <text x="110" y="30" text-anchor="middle" font-size="15" font-weight="700" fill="#065F46">扩展与保护接口</text>
+        <line x1="12" y1="60" x2="208" y2="60" stroke="#D1FAE5" stroke-width="1.5" />
+        
+        <text x="110" y="80" text-anchor="middle" font-size="12" fill="#047857" font-weight="600">CN1 扩展连接器</text>
+        <text x="110" y="98" text-anchor="middle" font-size="10" fill="#6B7280">1x8P 卧贴 2.0mm (PH系列)</text>
+        
+        <rect x="16" y="115" width="188" height="28" rx="6" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1" />
+        <text x="110" y="133" text-anchor="middle" font-size="10" fill="#10B981" font-weight="600">IF_3V3 · GND · IO4/5/6/7/2/10</text>
+        
+        <text x="110" y="168" text-anchor="middle" font-size="12" fill="#047857" font-weight="600">ESD 保护阵列</text>
+        <text x="110" y="186" text-anchor="middle" font-size="10" fill="#6B7280">PESD3V3L2BT-ES (4颗)</text>
+        <text x="110" y="204" text-anchor="middle" font-size="10" fill="#6B7280">双路双向 · IEC 61000-4-2</text>
+        <rect x="16" y="220" width="188" height="36" rx="6" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1" />
+        <text x="110" y="234" text-anchor="middle" font-size="10" fill="#10B981" font-weight="600">保护 IO4/5/6/7/2/10</text>
+        <text x="110" y="248" text-anchor="middle" font-size="10" fill="#10B981" font-weight="600">及 MCU_3V3</text>
+        
+        <text x="110" y="280" text-anchor="middle" font-size="11" fill="#047857" font-weight="600">对外供电能力</text>
+        <text x="110" y="298" text-anchor="middle" font-size="10" fill="#6B7280">IF_3V3 最大 500mA</text>
+        <text x="110" y="316" text-anchor="middle" font-size="10" fill="#6B7280">由 AO3401A 负载开关控制</text>
+    </g>
+
+    <!-- 用户按键模块 -->
+    <g transform="translate(60, 520)" filter="url(#shadow-md)">
+        <rect width="220" height="90" rx="16" fill="#FFFFFF" stroke="#F97316" stroke-width="2" />
+        <rect width="220" height="40" rx="16" fill="#FFF7ED" stroke="none" />
+        <path d="M 0 16 Q 0 0 16 0 L 204 0 Q 220 0 220 16 L 220 40 L 0 40 Z" fill="#FFF7ED" />
+        <text x="110" y="24" text-anchor="middle" font-size="14" font-weight="700" fill="#9A3412">SW1 用户按键</text>
+        <line x1="12" y1="46" x2="208" y2="46" stroke="#FFEDD5" stroke-width="1.5" />
+        <text x="110" y="64" text-anchor="middle" font-size="11" fill="#EA580C" font-weight="600">IO9 — 低电平触发</text>
+        <text x="110" y="80" text-anchor="middle" font-size="10" fill="#6B7280">轻触开关 TS-1088-AR02016</text>
+    </g>
+
+    <!-- 右侧模块组 -->
+    
+    <!-- 电源管理模块 -->
+    <g transform="translate(900, 60)" filter="url(#shadow-md)">
+        <rect width="240" height="230" rx="20" fill="#FFFFFF" stroke="#F59E0B" stroke-width="2" />
+        <rect width="240" height="48" rx="20" fill="#FFFBEB" stroke="none" />
+        <path d="M 0 20 Q 0 0 20 0 L 220 0 Q 240 0 240 20 L 240 48 L 0 48 Z" fill="#FFFBEB" />
+        <text x="120" y="30" text-anchor="middle" font-size="15" font-weight="700" fill="#92400E">电源管理</text>
+        <line x1="12" y1="60" x2="228" y2="60" stroke="#FEF3C7" stroke-width="1.5" />
+        
+        <text x="120" y="72" text-anchor="middle" font-size="12" fill="#B45309" font-weight="600">降压转换 (M3406-ADJ)</text>
+        <text x="120" y="88" text-anchor="middle" font-size="10" fill="#6B7280">VBUS → 3.3V / 800mA</text>
+        
+        <text x="120" y="108" text-anchor="middle" font-size="12" fill="#B45309" font-weight="600">锂电池充电 (TP4054)</text>
+        <text x="120" y="124" text-anchor="middle" font-size="10" fill="#6B7280">充电电流 500mA · 4.2V 饱和</text>
+        
+        <text x="120" y="144" text-anchor="middle" font-size="12" fill="#B45309" font-weight="600">负载开关 (AO3401A)</text>
+        <text x="120" y="160" text-anchor="middle" font-size="10" fill="#6B7280">IO0 控制 → IF_3V3 输出</text>
+        
+        <text x="120" y="180" text-anchor="middle" font-size="12" fill="#B45309" font-weight="600">电池电压监测 (IO3)</text>
+        <text x="120" y="196" text-anchor="middle" font-size="10" fill="#6B7280">100kΩ/100kΩ 分压</text>
+        <text x="120" y="212" text-anchor="middle" font-size="10" fill="#F59E0B" font-weight="500">ADC 实时电量检测</text>
+    </g>
+
+    <!-- USB 接口模块 -->
+    <g transform="translate(900, 310)" filter="url(#shadow-md)">
+        <rect width="240" height="140" rx="18" fill="#FFFFFF" stroke="#3B82F6" stroke-width="2" />
+        <rect width="240" height="44" rx="18" fill="#EFF6FF" stroke="none" />
+        <path d="M 0 18 Q 0 0 18 0 L 222 0 Q 240 0 240 18 L 240 44 L 0 44 Z" fill="#EFF6FF" />
+        <text x="120" y="26" text-anchor="middle" font-size="14" font-weight="700" fill="#1E3A8A">USB Type-C 接口</text>
+        <line x1="12" y1="50" x2="228" y2="50" stroke="#DBEAFE" stroke-width="1.5" />
+        <text x="120" y="72" text-anchor="middle" font-size="11" fill="#2563EB" font-weight="600">全功能 USB 2.0</text>
+        <text x="120" y="90" text-anchor="middle" font-size="10" fill="#6B7280">VBUS / D+ / D- / CC1/CC2</text>
+        <text x="120" y="112" text-anchor="middle" font-size="11" fill="#2563EB" font-weight="600">ESD 保护</text>
+        <text x="120" y="130" text-anchor="middle" font-size="10" fill="#6B7280">USBLC6-2SC6 + 22Ω 串联</text>
+    </g>
+
+    <!-- LED 指示灯模块 -->
+    <g transform="translate(900, 470)" filter="url(#shadow-md)">
+        <rect width="240" height="100" rx="16" fill="#FFFFFF" stroke="#E11D48" stroke-width="2" />
+        <rect width="240" height="40" rx="16" fill="#FFF1F2" stroke="none" />
+        <path d="M 0 16 Q 0 0 16 0 L 224 0 Q 240 0 240 16 L 240 40 L 0 40 Z" fill="#FFF1F2" />
+        <text x="120" y="26" text-anchor="middle" font-size="14" font-weight="700" fill="#881337">LED 状态指示</text>
+        <line x1="12" y1="52" x2="228" y2="52" stroke="#FECDD3" stroke-width="1.5" />
+        <text x="120" y="72" text-anchor="middle" font-size="11" fill="#BE123C" font-weight="600">蓝色 LED (XL-1005UBC)</text>
+        <text x="120" y="90" text-anchor="middle" font-size="10" fill="#6B7280">IO0 低电平点亮 · 限流 1.5kΩ</text>
+    </g>
+
+    <!-- 调试测试点模块 -->
+    <g transform="translate(350, 720)" filter="url(#shadow-md)">
+        <rect width="500" height="80" rx="18" fill="#FFFFFF" stroke="#8B5CF6" stroke-width="2" />
+        <rect width="480" height="40" rx="18" fill="#F5F3FF" stroke="none" />
+        <path d="M 0 18 Q 0 0 18 0 L 462 0 Q 480 0 480 18 L 480 40 L 0 40 Z" fill="#F5F3FF" />
+        <text x="240" y="26" text-anchor="middle" font-size="14" font-weight="700" fill="#4C1D95">板载调试测试点</text>
+        <line x1="12" y1="52" x2="468" y2="52" stroke="#EDE9FE" stroke-width="1.5" />
+        
+        <text x="45" y="68" text-anchor="middle" font-size="11" fill="#7C3AED" font-weight="600">TP1 (GND)</text>
+        <text x="120" y="68" text-anchor="middle" font-size="11" fill="#7C3AED" font-weight="600">TP2 (BAT+)</text>
+        <text x="195" y="68" text-anchor="middle" font-size="11" fill="#7C3AED" font-weight="600">TP3 (TXD0)</text>
+        <text x="270" y="68" text-anchor="middle" font-size="11" fill="#7C3AED" font-weight="600">TP4 (RXD0)</text>
+        <text x="345" y="68" text-anchor="middle" font-size="11" fill="#7C3AED" font-weight="600">TP5 (IO1)</text>
+        <text x="420" y="68" text-anchor="middle" font-size="11" fill="#7C3AED" font-weight="600">TP6 (IO8)</text>
+    </g>
+
+    <!-- 主控芯片 ESP32-C3 -->
+    <g transform="translate(400, 140)" filter="url(#shadow-md)">
+        <rect width="340" height="380" rx="24" fill="url(#chipGrad)" stroke="#334155" stroke-width="2" />
+        <rect x="10" y="10" width="320" height="360" rx="14" fill="none" stroke="#475569" stroke-width="1" stroke-dasharray="6 4" />
+        
+        <!-- 芯片内部展示 -->
+        <text x="170" y="45" text-anchor="middle" font-size="20" font-weight="800" fill="#E2E8F0" letter-spacing="0.5">ESP32-C3-WROOM-02</text>
+        <text x="170" y="70" text-anchor="middle" font-size="12" fill="#94A3B8">RISC-V 32 位处理器 · 160MHz</text>
+        <text x="170" y="90" text-anchor="middle" font-size="11" fill="#64748B">2.4GHz WiFi (802.11b/g/n) + Bluetooth 5.0</text>
+        <text x="170" y="110" text-anchor="middle" font-size="11" fill="#64748B">板载 PCB 天线 · 4MB Flash</text>
+        
+        <line x1="20" y1="125" x2="320" y2="125" stroke="#334155" stroke-width="2" />
+        
+        <!-- 引脚功能分组（左侧） -->
+        <g font-size="10" fill="#CBD5E1" font-family="monospace">
+            <rect x="0" y="145" width="28" height="3" fill="#10B981" rx="1.5" />
+            <text x="35" y="148" fill="#10B981">IO4 / IO5 / IO6 / IO7</text>
+            <rect x="0" y="175" width="28" height="3" fill="#10B981" rx="1.5" />
+            <text x="35" y="178" fill="#10B981">IO2 / IO10</text>
+            <rect x="0" y="205" width="28" height="3" fill="#F97316" rx="1.5" />
+            <text x="35" y="208" fill="#F97316">IO9 (按键输入)</text>
+            <rect x="0" y="235" width="28" height="3" fill="#64748B" rx="1.5" />
+            <text x="35" y="238" fill="#64748B">IO1 / IO8 (预留)</text>
+        </g>
+
+        <!-- 引脚功能分组（右侧） -->
+        <g font-size="10" fill="#CBD5E1" font-family="monospace">
+            <rect x="312" y="145" width="28" height="3" fill="#F59E0B" rx="1.5" />
+            <text x="305" y="148" text-anchor="end" fill="#F59E0B">3V3 / EN</text>
+            <rect x="312" y="175" width="28" height="3" fill="#3B82F6" rx="1.5" />
+            <text x="305" y="178" text-anchor="end" fill="#3B82F6">IO18 (USB D-) / IO19 (USB D+)</text>
+            <rect x="312" y="205" width="28" height="3" fill="#E11D48" rx="1.5" />
+            <text x="305" y="208" text-anchor="end" fill="#E11D48">IO0 (LED 控制)</text>
+            <rect x="312" y="235" width="28" height="3" fill="#8B5CF6" rx="1.5" />
+            <text x="305" y="238" text-anchor="end" fill="#8B5CF6">TXD0 / RXD0</text>
+            <rect x="312" y="265" width="28" height="3" fill="#F59E0B" rx="1.5" />
+            <text x="305" y="268" text-anchor="end" fill="#F59E0B">IO3 (电池电压 ADC)</text>
+        </g>
+        
+        <!-- 底部 EP 焊盘 -->
+        <rect x="130" y="350" width="80" height="3" fill="#64748B" rx="1.5" />
+        <text x="170" y="365" text-anchor="middle" fill="#64748B" font-size="10">EP (GND 散热焊盘)</text>
+        
+        <rect x="20" y="310" width="300" height="28" rx="6" fill="#1E293B" stroke="#334155" stroke-width="1" />
+        <text x="170" y="328" text-anchor="middle" font-size="10" fill="#94A3B8">封装: 邮票孔模组 (16x18x3.2mm) | 工作温度: -40℃~+85℃</text>
+    </g>
+
+    <!-- 总线标签 -->
+    <g font-size="11" font-weight="600">
+        <text x="305" y="242" fill="#10B981" transform="rotate(-90,305,242)">扩展总线 (SPI/GPIO)</text>
+        <text x="285" y="420" fill="#F97316" transform="rotate(-90,285,420)">按键信号</text>
+        
+        <text x="835" y="237" fill="#F59E0B" transform="rotate(-90,835,237)">电源管理总线</text>
+        <text x="895" y="349" fill="#3B82F6" transform="rotate(-90,895,349)">USB 差分总线</text>
+        <text x="865" y="434" fill="#E11D48" transform="rotate(-90,865,434)">LED 控制线</text>
+        <text x="755" y="549" fill="#8B5CF6" transform="rotate(-90,755,549)">调试总线</text>
+    </g>
+
+    <!-- 底部图例 -->
+    <g transform="translate(300, 830)">
+        <rect x="0" y="0" width="600" height="36" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1" filter="url(#shadow-sm)" />
+        <circle cx="25" cy="18" r="6" fill="#10B981" />
+        <text x="40" y="22" font-size="11" fill="#334155">扩展与保护</text>
+        
+        <circle cx="130" cy="18" r="6" fill="#F97316" />
+        <text x="145" y="22" font-size="11" fill="#334155">用户按键</text>
+        
+        <circle cx="235" cy="18" r="6" fill="#F59E0B" />
+        <text x="250" y="22" font-size="11" fill="#334155">电源管理</text>
+        
+        <circle cx="340" cy="18" r="6" fill="#3B82F6" />
+        <text x="355" y="22" font-size="11" fill="#334155">USB 接口</text>
+        
+        <circle cx="435" cy="18" r="6" fill="#E11D48" />
+        <text x="450" y="22" font-size="11" fill="#334155">LED 指示</text>
+        
+        <circle cx="530" cy="18" r="6" fill="#8B5CF6" />
+        <text x="545" y="22" font-size="11" fill="#334155">调试测试点</text>
+    </g>
+
+    <text x="600" y="890" text-anchor="middle" font-size="10" fill="#94A3B8">基于 Netlist_Main_2026-04-13 精确映射 | 硬件版本 ESProbe v1.0A | 同色单线总线设计</text>
+</svg>

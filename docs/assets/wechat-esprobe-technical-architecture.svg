@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#06101f"/>
+      <stop offset="0.52" stop-color="#0f2750"/>
+      <stop offset="1" stop-color="#07111f"/>
+    </linearGradient>
+    <linearGradient id="host" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1d4ed8"/>
+      <stop offset="1" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="probe" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f766e"/>
+      <stop offset="1" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="target" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7c2d12"/>
+      <stop offset="1" stop-color="#0f172a"/>
+    </linearGradient>
+    <filter id="shadow" x="-18%" y="-18%" width="136%" height="136%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+    <marker id="arrow" markerWidth="16" markerHeight="16" refX="12" refY="8" orient="auto">
+      <path d="M0,0 L16,8 L0,16 Z" fill="#67e8f9"/>
+    </marker>
+    <marker id="arrow2" markerWidth="16" markerHeight="16" refX="12" refY="8" orient="auto">
+      <path d="M0,0 L16,8 L0,16 Z" fill="#fbbf24"/>
+    </marker>
+  </defs>
+  <rect width="1600" height="1000" rx="42" fill="url(#bg)"/>
+  <circle cx="1320" cy="160" r="300" fill="#22d3ee" opacity="0.09"/>
+  <circle cx="240" cy="850" r="260" fill="#f59e0b" opacity="0.10"/>
+  <text x="80" y="100" fill="#f8fafc" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="56" font-weight="800">ESProbe 技术原理：把 USB 调试器搬到 WiFi 上</text>
+  <text x="82" y="150" fill="#bfdbfe" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="27">IDE / OpenOCD / pyOCD 仍然看见 CMSIS-DAP，网络只藏在 USB/IP 这一层</text>
+
+  <g filter="url(#shadow)">
+    <rect x="70" y="230" width="425" height="610" rx="36" fill="url(#host)" stroke="#60a5fa" stroke-width="3"/>
+    <text x="282" y="290" text-anchor="middle" fill="#ffffff" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="36" font-weight="800">PC / Windows / Linux</text>
+    <rect x="115" y="335" width="335" height="70" rx="20" fill="#eff6ff"/>
+    <text x="282" y="379" text-anchor="middle" fill="#1e3a8a" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="27" font-weight="700">IDE：Keil / VS Code / CLion</text>
+    <rect x="115" y="430" width="335" height="70" rx="20" fill="#dbeafe"/>
+    <text x="282" y="474" text-anchor="middle" fill="#1e40af" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="27" font-weight="700">OpenOCD / pyOCD</text>
+    <rect x="115" y="525" width="335" height="70" rx="20" fill="#bfdbfe"/>
+    <text x="282" y="569" text-anchor="middle" fill="#1e3a8a" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="27" font-weight="700">CMSIS-DAP v2 Bulk</text>
+    <rect x="115" y="620" width="335" height="70" rx="20" fill="#93c5fd"/>
+    <text x="282" y="664" text-anchor="middle" fill="#0f172a" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="27" font-weight="700">USB/IP Client / VHCI</text>
+    <text x="282" y="745" text-anchor="middle" fill="#bfdbfe" font-family="Consolas, monospace" font-size="25">attach dap.local:3240</text>
+
+    <rect x="595" y="230" width="425" height="610" rx="36" fill="url(#probe)" stroke="#5eead4" stroke-width="3"/>
+    <text x="807" y="290" text-anchor="middle" fill="#ffffff" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="36" font-weight="800">ESProbe / ESP32-C3</text>
+    <rect x="640" y="335" width="335" height="70" rx="20" fill="#ecfeff"/>
+    <text x="807" y="379" text-anchor="middle" fill="#115e59" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="27" font-weight="700">WiFi STA + mDNS</text>
+    <rect x="640" y="430" width="335" height="70" rx="20" fill="#ccfbf1"/>
+    <text x="807" y="474" text-anchor="middle" fill="#134e4a" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="27" font-weight="700">TCP Server :3240</text>
+    <rect x="640" y="525" width="335" height="70" rx="20" fill="#99f6e4"/>
+    <text x="807" y="569" text-anchor="middle" fill="#0f172a" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="27" font-weight="700">USBIP Stage1/Stage2</text>
+    <rect x="640" y="620" width="335" height="70" rx="20" fill="#5eead4"/>
+    <text x="807" y="664" text-anchor="middle" fill="#0f172a" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="27" font-weight="700">DAP RingBuffer + Task</text>
+    <rect x="640" y="715" width="335" height="70" rx="20" fill="#2dd4bf"/>
+    <text x="807" y="759" text-anchor="middle" fill="#042f2e" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="27" font-weight="700">SWD GPIO / SPI</text>
+
+    <rect x="1120" y="230" width="405" height="610" rx="36" fill="url(#target)" stroke="#fb923c" stroke-width="3"/>
+    <text x="1322" y="290" text-anchor="middle" fill="#ffffff" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="36" font-weight="800">Target MCU</text>
+    <rect x="1165" y="390" width="315" height="80" rx="22" fill="#ffedd5"/>
+    <text x="1322" y="439" text-anchor="middle" fill="#9a3412" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="29" font-weight="800">CoreSight DAP</text>
+    <rect x="1165" y="515" width="315" height="80" rx="22" fill="#fed7aa"/>
+    <text x="1322" y="564" text-anchor="middle" fill="#7c2d12" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="29" font-weight="800">Flash / RAM / Registers</text>
+    <rect x="1165" y="640" width="315" height="80" rx="22" fill="#fdba74"/>
+    <text x="1322" y="689" text-anchor="middle" fill="#431407" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="29" font-weight="800">RTT / Breakpoint / Step</text>
+  </g>
+
+  <path d="M495 655 C535 655 555 655 590 655" stroke="#67e8f9" stroke-width="7" fill="none" marker-end="url(#arrow)"/>
+  <text x="542" y="625" text-anchor="middle" fill="#67e8f9" font-family="Consolas, monospace" font-size="24" font-weight="700">TCP 3240</text>
+  <path d="M1020 748 C1060 748 1080 748 1115 748" stroke="#fbbf24" stroke-width="7" fill="none" marker-end="url(#arrow2)"/>
+  <text x="1068" y="718" text-anchor="middle" fill="#fbbf24" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="24" font-weight="700">SWD：CLK / DIO / RESET</text>
+
+  <g transform="translate(160 885)">
+    <rect width="1280" height="64" rx="26" fill="#020617" opacity="0.86" stroke="#1e293b"/>
+    <text x="640" y="42" text-anchor="middle" fill="#dbeafe" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="25" font-weight="700">关键点：ESProbe 不要求 IDE 理解 WiFi；它把 WiFi 隐藏在 USB/IP 后面，让上层继续使用熟悉的 CMSIS-DAP。</text>
+  </g>
+</svg>

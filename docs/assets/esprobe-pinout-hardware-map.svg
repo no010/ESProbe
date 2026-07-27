@@ -1,0 +1,221 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">ESProbe clean hardware connection diagram</title>
+  <desc id="desc">A clean balanced presentation diagram derived from ESProbe hardware netlist.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#07111f"/>
+      <stop offset="1" stop-color="#0d1728"/>
+    </linearGradient>
+    <linearGradient id="board" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#16803f"/>
+      <stop offset="1" stop-color="#0f5f32"/>
+    </linearGradient>
+    <linearGradient id="module" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#dce3ee"/>
+    </linearGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#c7cdd6"/>
+      <stop offset="0.24" stop-color="#ffffff"/>
+      <stop offset="0.5" stop-color="#9aa3af"/>
+      <stop offset="0.76" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#c7cdd6"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="22" stdDeviation="28" flood-color="#000" flood-opacity="0.32"/>
+    </filter>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000" flood-opacity="0.18"/>
+    </filter>
+    <marker id="arrow-power" markerWidth="12" markerHeight="12" refX="10" refY="5" orient="auto">
+      <path d="M0 0 L0 10 L11 5 Z" fill="#fbbf24"/>
+    </marker>
+    <marker id="arrow-usb" markerWidth="12" markerHeight="12" refX="10" refY="5" orient="auto">
+      <path d="M0 0 L0 10 L11 5 Z" fill="#38bdf8"/>
+    </marker>
+    <marker id="arrow-swd" markerWidth="12" markerHeight="12" refX="10" refY="5" orient="auto">
+      <path d="M0 0 L0 10 L11 5 Z" fill="#34d399"/>
+    </marker>
+    <marker id="arrow-io" markerWidth="12" markerHeight="12" refX="10" refY="5" orient="auto">
+      <path d="M0 0 L0 10 L11 5 Z" fill="#a78bfa"/>
+    </marker>
+    <style>
+      .title { font: 800 44px "Microsoft YaHei", "Noto Sans CJK SC", Arial, sans-serif; fill: #f8fafc; }
+      .sub { font: 18px "Microsoft YaHei", "Noto Sans CJK SC", Arial, sans-serif; fill: #b8c4d6; }
+      .card-title { font: 800 24px "Microsoft YaHei", "Noto Sans CJK SC", Arial, sans-serif; fill: #0f172a; }
+      .card-body { font: 17px "Microsoft YaHei", "Noto Sans CJK SC", Arial, sans-serif; fill: #334155; }
+      .card-small { font: 14px "Microsoft YaHei", "Noto Sans CJK SC", Arial, sans-serif; fill: #64748b; }
+      .chip-title { font: 800 32px "Microsoft YaHei", "Noto Sans CJK SC", Arial, sans-serif; fill: #1f2937; }
+      .chip-body { font: 18px "Microsoft YaHei", "Noto Sans CJK SC", Arial, sans-serif; fill: #475569; }
+      .pin { font: 800 15px "JetBrains Mono", Consolas, monospace; fill: #0f172a; }
+      .silk { font: 800 24px "Microsoft YaHei", "Noto Sans CJK SC", Arial, sans-serif; fill: rgba(255,255,255,0.55); }
+      .card { fill: #f8fafc; stroke: rgba(203,213,225,0.85); stroke-width: 1.5; filter: url(#soft); }
+      .pill { fill: #eef2ff; stroke: #dbeafe; stroke-width: 1; }
+      .trace { fill: none; stroke: rgba(134,239,172,0.19); stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; }
+      .trace2 { fill: none; stroke: rgba(134,239,172,0.13); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+      .via { fill: #0c5f32; stroke: rgba(134,239,172,0.36); stroke-width: 2; }
+      .pad { fill: #facc15; stroke: #fef3c7; stroke-width: 1.2; }
+      .line { fill: none; stroke-width: 4.5; stroke-linecap: round; stroke-linejoin: round; }
+      .power { stroke: #fbbf24; marker-end: url(#arrow-power); }
+      .usb { stroke: #38bdf8; marker-end: url(#arrow-usb); }
+      .swd { stroke: #34d399; marker-end: url(#arrow-swd); }
+      .io { stroke: #a78bfa; marker-end: url(#arrow-io); }
+      .muted-line { fill: none; stroke: rgba(226,232,240,0.32); stroke-width: 2; stroke-linecap: round; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#bg)"/>
+  <circle cx="190" cy="160" r="250" fill="#0ea5e9" opacity="0.08"/>
+  <circle cx="1400" cy="820" r="320" fill="#22c55e" opacity="0.08"/>
+
+  <text class="title" x="84" y="82">ESProbe 硬件连接图</text>
+  <text class="sub" x="86" y="116">基于 Netlist_Main_2026-04-13.json：ESP32-C3、Type-C、CN1、BOOT、LED 与电源路径</text>
+
+  <g filter="url(#shadow)">
+    <rect x="260" y="192" width="1080" height="650" rx="54" fill="url(#board)" stroke="#c8b56a" stroke-width="3"/>
+    <rect x="294" y="226" width="1012" height="582" rx="36" fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="2"/>
+  </g>
+
+  <g opacity="0.95">
+    <path class="trace" d="M420 355 H615 Q650 355 690 392 H760"/>
+    <path class="trace" d="M420 435 H630 Q666 435 704 468 H760"/>
+    <path class="trace" d="M420 515 H646 Q682 515 720 550 H760"/>
+    <path class="trace" d="M820 705 H980 Q1038 705 1082 660 H1220"/>
+    <path class="trace2" d="M956 318 H1160 Q1210 318 1258 372"/>
+    <path class="trace2" d="M956 620 H1150 Q1218 620 1258 560"/>
+  </g>
+  <circle class="via" cx="615" cy="355" r="7"/>
+  <circle class="via" cx="630" cy="435" r="7"/>
+  <circle class="via" cx="646" cy="515" r="7"/>
+  <circle class="via" cx="980" cy="705" r="7"/>
+  <circle class="via" cx="1160" cy="318" r="7"/>
+  <circle class="via" cx="1150" cy="620" r="7"/>
+
+  <g opacity="0.95">
+    <circle cx="334" cy="286" r="42" fill="#050505" stroke="#d9ca78" stroke-width="4"/>
+    <circle cx="1266" cy="286" r="42" fill="#050505" stroke="#d9ca78" stroke-width="4"/>
+    <circle cx="334" cy="748" r="42" fill="#050505" stroke="#d9ca78" stroke-width="4"/>
+    <circle cx="1266" cy="748" r="42" fill="#050505" stroke="#d9ca78" stroke-width="4"/>
+    <path d="M298 250 A62 62 0 1 1 276 320" fill="none" stroke="rgba(255,255,255,0.88)" stroke-width="5" stroke-linecap="round"/>
+    <path d="M1230 250 A62 62 0 1 1 1208 320" fill="none" stroke="rgba(255,255,255,0.88)" stroke-width="5" stroke-linecap="round"/>
+    <path d="M298 712 A62 62 0 1 1 276 782" fill="none" stroke="rgba(255,255,255,0.88)" stroke-width="5" stroke-linecap="round"/>
+    <path d="M1230 712 A62 62 0 1 1 1208 782" fill="none" stroke="rgba(255,255,255,0.88)" stroke-width="5" stroke-linecap="round"/>
+  </g>
+
+  <g transform="translate(682 304)" filter="url(#soft)">
+    <rect x="0" y="0" width="420" height="340" rx="20" fill="#3f3f46"/>
+    <rect x="42" y="64" width="336" height="192" rx="5" fill="url(#module)" stroke="#b8c0cc" stroke-width="3"/>
+    <text class="chip-title" x="145" y="132">ESP32-C3</text>
+    <text class="chip-title" x="98" y="172">WROOM-02-N4</text>
+    <text class="chip-body" x="120" y="215">U1 / 4MB Flash / Wi-Fi + BLE</text>
+    <circle cx="72" cy="236" r="8" fill="#737373"/>
+    <g transform="translate(-28 44)">
+      <rect class="pad" x="0" y="0" width="18" height="36" rx="3"/>
+      <rect class="pad" x="0" y="60" width="18" height="36" rx="3"/>
+      <rect class="pad" x="0" y="120" width="18" height="36" rx="3"/>
+      <rect class="pad" x="0" y="180" width="18" height="36" rx="3"/>
+      <rect class="pad" x="0" y="240" width="18" height="36" rx="3"/>
+    </g>
+    <g transform="translate(430 44)">
+      <rect class="pad" x="0" y="0" width="18" height="36" rx="3"/>
+      <rect class="pad" x="0" y="60" width="18" height="36" rx="3"/>
+      <rect class="pad" x="0" y="120" width="18" height="36" rx="3"/>
+      <rect class="pad" x="0" y="180" width="18" height="36" rx="3"/>
+      <rect class="pad" x="0" y="240" width="18" height="36" rx="3"/>
+    </g>
+  </g>
+
+  <g transform="translate(392 340)" filter="url(#soft)">
+    <rect x="0" y="0" width="86" height="350" rx="10" fill="#f8fafc" stroke="#d1d5db" stroke-width="3"/>
+    <rect x="17" y="28" width="52" height="34" rx="5" fill="#dfe3e9"/>
+    <rect x="17" y="88" width="52" height="34" rx="5" fill="#dfe3e9"/>
+    <rect x="17" y="148" width="52" height="34" rx="5" fill="#dfe3e9"/>
+    <rect x="17" y="208" width="52" height="34" rx="5" fill="#dfe3e9"/>
+    <rect x="17" y="268" width="52" height="34" rx="5" fill="#dfe3e9"/>
+    <text class="pin" transform="translate(54 202) rotate(-90)">CN1</text>
+  </g>
+
+  <g transform="translate(1182 444)" filter="url(#soft)">
+    <rect x="0" y="0" width="188" height="134" rx="28" fill="url(#metal)" stroke="#e5e7eb" stroke-width="3"/>
+    <rect x="28" y="28" width="132" height="78" rx="18" fill="#f8fafc"/>
+    <rect x="56" y="44" width="76" height="46" rx="8" fill="#374151"/>
+    <text class="pin" x="65" y="164">USB-C</text>
+  </g>
+
+  <g transform="translate(674 694)" filter="url(#soft)">
+    <rect x="0" y="0" width="86" height="86" rx="12" fill="#f8fafc" stroke="#d1d5db" stroke-width="3"/>
+    <circle cx="43" cy="43" r="28" fill="#111827"/>
+    <text class="pin" x="-6" y="118">SW1 / IO9</text>
+  </g>
+  <g transform="translate(956 725)" filter="url(#soft)">
+    <circle cx="0" cy="0" r="24" fill="#38bdf8" opacity="0.22"/>
+    <circle cx="0" cy="0" r="12" fill="#38bdf8"/>
+    <text class="pin" x="-38" y="48">U2 / IO0</text>
+  </g>
+
+  <text class="silk" x="492" y="772">ESProbe-v1.0A</text>
+  <text class="silk" x="544" y="812">by Peter</text>
+
+  <g>
+    <rect class="card" x="82" y="196" width="350" height="150" rx="22"/>
+    <text class="card-title" x="116" y="242">电源</text>
+    <text class="card-body" x="116" y="278">USB1 VBUS → VIN → U10</text>
+    <text class="card-body" x="116" y="308">M3406-ADJ → MCU_3V3</text>
+    <path class="line power" d="M432 270 C518 270 575 314 664 385"/>
+  </g>
+
+  <g>
+    <rect class="card" x="82" y="418" width="350" height="168" rx="22"/>
+    <text class="card-title" x="116" y="464">CN1 调试接口</text>
+    <text class="card-body" x="116" y="500">IO6: SWCLK    IO7: SWDIO</text>
+    <text class="card-body" x="116" y="532">IO4/IO5: UART1 桥接</text>
+    <text class="card-small" x="116" y="562">Pin1: IF_3V3，Pin2/9/10: GND</text>
+    <path class="line swd" d="M432 500 C520 500 570 480 654 474"/>
+  </g>
+
+  <g>
+    <rect class="card" x="82" y="662" width="350" height="150" rx="22"/>
+    <text class="card-title" x="116" y="708">BOOT / LED</text>
+    <text class="card-body" x="116" y="744">SW1 拉低 IO9 进入下载</text>
+    <text class="card-body" x="116" y="774">IO0 驱动蓝色 LED，低电平点亮</text>
+    <path class="line io" d="M432 738 C520 738 588 728 664 728"/>
+  </g>
+
+  <g>
+    <rect class="card" x="1168" y="196" width="350" height="150" rx="22"/>
+    <text class="card-title" x="1202" y="242">USB 下载</text>
+    <text class="card-body" x="1202" y="278">IO18 → R59 → USB_D-</text>
+    <text class="card-body" x="1202" y="308">IO19 → R60 → USB_D+</text>
+    <path class="line usb" d="M1218 346 C1210 386 1194 420 1172 464"/>
+  </g>
+
+  <g>
+    <rect class="card" x="1168" y="662" width="350" height="150" rx="22"/>
+    <text class="card-title" x="1202" y="708">Hello World 验证</text>
+    <text class="card-body" x="1202" y="744">target = esp32c3</text>
+    <text class="card-body" x="1202" y="774">日志识别 4MB Flash</text>
+    <path class="line usb" d="M1168 738 C1084 710 1022 674 974 612"/>
+  </g>
+
+  <g>
+    <rect class="pill" x="616" y="244" width="116" height="34" rx="17"/>
+    <text class="card-small" x="641" y="267">USB Serial</text>
+    <rect class="pill" x="868" y="244" width="124" height="34" rx="17"/>
+    <text class="card-small" x="898" y="267">SWD / UART</text>
+  </g>
+
+  <g>
+    <rect x="620" y="306" width="76" height="30" rx="8" fill="#fef3c7" stroke="#fde68a"/>
+    <text class="pin" x="640" y="326">IO18</text>
+    <rect x="620" y="348" width="76" height="30" rx="8" fill="#fef3c7" stroke="#fde68a"/>
+    <text class="pin" x="640" y="368">IO19</text>
+    <rect x="1050" y="324" width="76" height="30" rx="8" fill="#dcfce7" stroke="#86efac"/>
+    <text class="pin" x="1074" y="344">IO4</text>
+    <rect x="1110" y="380" width="76" height="30" rx="8" fill="#dcfce7" stroke="#86efac"/>
+    <text class="pin" x="1134" y="400">IO5</text>
+    <rect x="1110" y="466" width="86" height="30" rx="8" fill="#dcfce7" stroke="#86efac"/>
+    <text class="pin" x="1134" y="486">IO6</text>
+    <rect x="1110" y="508" width="86" height="30" rx="8" fill="#dcfce7" stroke="#86efac"/>
+    <text class="pin" x="1134" y="528">IO7</text>
+  </g>
+</svg>

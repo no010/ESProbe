@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#07111f"/>
+      <stop offset="0.55" stop-color="#10264a"/>
+      <stop offset="1" stop-color="#07111f"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#17345f"/>
+      <stop offset="1" stop-color="#0d1c33"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="16" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+    <marker id="arrow" markerWidth="14" markerHeight="14" refX="10" refY="7" orient="auto">
+      <path d="M0,0 L14,7 L0,14 Z" fill="#4fd1ff"/>
+    </marker>
+  </defs>
+  <rect width="1400" height="900" rx="36" fill="url(#bg)"/>
+  <circle cx="1120" cy="160" r="260" fill="#1f7aff" opacity="0.12"/>
+  <circle cx="200" cy="760" r="240" fill="#36e0a1" opacity="0.10"/>
+  <text x="80" y="110" fill="#eaf6ff" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="52" font-weight="700">ESProbe Blink：把硬件变成“会呼吸”的板子</text>
+  <text x="82" y="158" fill="#9fc3e8" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="25">从网表确认、ESP-IDF 工程，到 GPIO0 蓝色 LED 周期闪烁</text>
+
+  <g filter="url(#shadow)">
+    <rect x="90" y="235" width="245" height="170" rx="28" fill="url(#card)" stroke="#2e68aa"/>
+    <text x="212" y="292" text-anchor="middle" fill="#ffffff" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="30" font-weight="700">硬件事实</text>
+    <text x="212" y="338" text-anchor="middle" fill="#b7d7f5" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="22">ESP32-C3</text>
+    <text x="212" y="372" text-anchor="middle" fill="#b7d7f5" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="22">IO0 → 蓝色 LED</text>
+
+    <rect x="420" y="235" width="245" height="170" rx="28" fill="url(#card)" stroke="#2e68aa"/>
+    <text x="542" y="292" text-anchor="middle" fill="#ffffff" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="30" font-weight="700">工程配置</text>
+    <text x="542" y="338" text-anchor="middle" fill="#b7d7f5" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="22">target=esp32c3</text>
+    <text x="542" y="372" text-anchor="middle" fill="#b7d7f5" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="22">BLINK_GPIO=0</text>
+
+    <rect x="750" y="235" width="245" height="170" rx="28" fill="url(#card)" stroke="#2e68aa"/>
+    <text x="872" y="292" text-anchor="middle" fill="#ffffff" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="30" font-weight="700">烧录验证</text>
+    <text x="872" y="338" text-anchor="middle" fill="#b7d7f5" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="22">idf.py flash</text>
+    <text x="872" y="372" text-anchor="middle" fill="#b7d7f5" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="22">monitor 看日志</text>
+
+    <rect x="1080" y="235" width="245" height="170" rx="28" fill="url(#card)" stroke="#2e68aa"/>
+    <text x="1202" y="292" text-anchor="middle" fill="#ffffff" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="30" font-weight="700">板级心跳</text>
+    <text x="1202" y="338" text-anchor="middle" fill="#b7d7f5" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="22">LED 周期闪烁</text>
+    <text x="1202" y="372" text-anchor="middle" fill="#b7d7f5" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="22">电源/下载/GPIO OK</text>
+  </g>
+  <path d="M345 320 H400" stroke="#4fd1ff" stroke-width="5" marker-end="url(#arrow)"/>
+  <path d="M675 320 H730" stroke="#4fd1ff" stroke-width="5" marker-end="url(#arrow)"/>
+  <path d="M1005 320 H1060" stroke="#4fd1ff" stroke-width="5" marker-end="url(#arrow)"/>
+
+  <g transform="translate(145 520)">
+    <rect width="1110" height="230" rx="34" fill="#08192f" stroke="#204a7a"/>
+    <text x="48" y="64" fill="#6ee7ff" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="28" font-weight="700">Blink 在 ESProbe 开发链路中的位置</text>
+    <text x="48" y="112" fill="#dbeafe" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="24">Hello World 确认芯片和下载链路 → Blink 确认板载 LED 和 GPIO 极性 → DAP 固件再接入 WiFi、USBIP、SWD、UART 桥</text>
+    <text x="48" y="165" fill="#9fc3e8" font-family="Consolas, monospace" font-size="24">ESProbe/ blink / main / blink_example_main.c</text>
+    <text x="48" y="204" fill="#9fc3e8" font-family="Consolas, monospace" font-size="24">idf.py set-target esp32c3  →  idf.py build  →  idf.py -p COMxx flash monitor</text>
+  </g>
+  <text x="1320" y="830" text-anchor="end" fill="#5d7fa8" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="20">ESProbe 微信文章配图</text>
+</svg>

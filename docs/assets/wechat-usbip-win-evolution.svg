@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900">
+  <defs>
+    <linearGradient id="bg2" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#fff7ed"/>
+      <stop offset="0.45" stop-color="#eff6ff"/>
+      <stop offset="1" stop-color="#ecfeff"/>
+    </linearGradient>
+    <filter id="soft" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#0f172a" flood-opacity="0.16"/>
+    </filter>
+    <marker id="arrow2" markerWidth="14" markerHeight="14" refX="11" refY="7" orient="auto">
+      <path d="M0,0 L14,7 L0,14 Z" fill="#2563eb"/>
+    </marker>
+  </defs>
+  <rect width="1400" height="900" rx="36" fill="url(#bg2)"/>
+  <text x="80" y="112" fill="#0f172a" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="52" font-weight="800">usbip-win → usbip-win2：Windows 上的 USB/IP 客户端演进</text>
+  <text x="82" y="160" fill="#475569" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="25">从“能跑通协议”到“更现代的驱动和安装体验”</text>
+
+  <g filter="url(#soft)">
+    <rect x="95" y="250" width="360" height="380" rx="34" fill="#ffffff" stroke="#fed7aa" stroke-width="3"/>
+    <text x="275" y="310" text-anchor="middle" fill="#c2410c" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="34" font-weight="800">usbip-win</text>
+    <text x="135" y="370" fill="#334155" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="25">• Windows server + client</text>
+    <text x="135" y="420" fill="#334155" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="25">• usbip.exe / usbipd.exe</text>
+    <text x="135" y="470" fill="#334155" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="25">• stub / vhci 驱动</text>
+    <text x="135" y="520" fill="#334155" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="25">• 适合理解协议全貌</text>
+    <rect x="135" y="560" width="280" height="42" rx="21" fill="#ffedd5"/>
+    <text x="275" y="589" text-anchor="middle" fill="#9a3412" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="22" font-weight="700">早期 Windows USB/IP 方案</text>
+
+    <rect x="520" y="250" width="360" height="380" rx="34" fill="#ffffff" stroke="#bfdbfe" stroke-width="3"/>
+    <text x="700" y="310" text-anchor="middle" fill="#1d4ed8" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="34" font-weight="800">usbip-win2</text>
+    <text x="560" y="370" fill="#334155" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="25">• Windows USB/IP client</text>
+    <text x="560" y="420" fill="#334155" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="25">• 面向 Linux USB/IP server</text>
+    <text x="560" y="470" fill="#334155" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="25">• WHLK certified drivers</text>
+    <text x="560" y="520" fill="#334155" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="25">• 更适合日常挂载远端设备</text>
+    <rect x="560" y="560" width="280" height="42" rx="21" fill="#dbeafe"/>
+    <text x="700" y="589" text-anchor="middle" fill="#1e40af" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="22" font-weight="700">现代客户端方向</text>
+
+    <rect x="945" y="250" width="360" height="380" rx="34" fill="#ffffff" stroke="#bbf7d0" stroke-width="3"/>
+    <text x="1125" y="310" text-anchor="middle" fill="#047857" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="34" font-weight="800">ESProbe 场景</text>
+    <text x="985" y="370" fill="#334155" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="25">• 设备端跑 USBIP server</text>
+    <text x="985" y="420" fill="#334155" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="25">• Windows 侧 attach</text>
+    <text x="985" y="470" fill="#334155" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="25">• 暴露 CMSIS-DAP v2</text>
+    <text x="985" y="520" fill="#334155" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="25">• OpenOCD/Keil/IAR 复用</text>
+    <rect x="985" y="560" width="280" height="42" rx="21" fill="#dcfce7"/>
+    <text x="1125" y="589" text-anchor="middle" fill="#166534" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="22" font-weight="700">无线调试探针落地</text>
+  </g>
+  <path d="M455 440 H500" stroke="#2563eb" stroke-width="5" marker-end="url(#arrow2)"/>
+  <path d="M880 440 H925" stroke="#2563eb" stroke-width="5" marker-end="url(#arrow2)"/>
+  <rect x="145" y="705" width="1110" height="86" rx="28" fill="#0f172a" opacity="0.92"/>
+  <text x="700" y="760" text-anchor="middle" fill="#e0f2fe" font-family="Segoe UI, Microsoft YaHei, Arial" font-size="28" font-weight="700">一句话：usbip-win 更像基础设施探索，usbip-win2 更像可用性更强的 Windows 客户端。</text>
+</svg>

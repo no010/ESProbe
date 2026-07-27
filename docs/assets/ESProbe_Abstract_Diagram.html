@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ESProbe v1.0A System Diagram</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #060e06;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  }
+  svg {
+    max-width: 100vw;
+    max-height: 100vh;
+    box-shadow: 0 0 80px rgba(20,80,20,0.3);
+  }
+  .module-label {
+    font-size: 14px;
+    font-weight: 600;
+    fill: #e0f0e0;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    letter-spacing: 1px;
+  }
+  .module-sub {
+    font-size: 10px;
+    fill: #80a080;
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
+  .pin-label {
+    font-size: 9px;
+    fill: #a0c0a0;
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
+  .flow-line {
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    opacity: 0.7;
+  }
+  .flow-dash {
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    opacity: 0.9;
+    stroke-dasharray: 6 8;
+    animation: dashFlow 1.5s linear infinite;
+  }
+  @keyframes dashFlow {
+    to { stroke-dashoffset: -28; }
+  }
+  .title-text {
+    font-size: 28px;
+    font-weight: 700;
+    fill: #d0e8d0;
+    letter-spacing: 4px;
+  }
+  .subtitle-text {
+    font-size: 13px;
+    fill: #608060;
+    letter-spacing: 2px;
+  }
+</style>
+</head>
+<body>
+<svg viewBox="0 0 1600 1000" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#0f2a0f" stroke-width="0.5"/>
+    </pattern>
+    <filter id="glow-green" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-cyan" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-orange" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-purple" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <linearGradient id="grad-mcu" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a3a1a" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#0d200d" stop-opacity="0.95"/>
+    </linearGradient>
+    <linearGradient id="grad-box" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#142e14" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#0a1a0a" stop-opacity="0.85"/>
+    </linearGradient>
+    <marker id="arrow-orange" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 L2,3 z" fill="#f0a030"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 L2,3 z" fill="#40ff60"/>
+    </marker>
+    <marker id="arrow-cyan" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 L2,3 z" fill="#30e0f0"/>
+    </marker>
+    <marker id="arrow-purple" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 L2,3 z" fill="#c040ff"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1600" height="1000" fill="#060e06"/>
+  <rect width="1600" height="1000" fill="url(#grid)"/>
+
+  <!-- Decorative PCB outline traces -->
+  <path d="M 80 80 L 1520 80 L 1520 920 L 80 920 Z" fill="none" stroke="#1a4a1a" stroke-width="2" opacity="0.4"/>
+  <path d="M 100 100 L 1500 100 L 1500 900 L 100 900 Z" fill="none" stroke="#1a4a1a" stroke-width="1" opacity="0.25"/>
+
+  <!-- Title -->
+  <text x="800" y="55" class="title-text" text-anchor="middle">ESProbe</text>
+  <text x="800" y="82" class="subtitle-text" text-anchor="middle">Wireless CMSIS-DAP Debug Probe  v1.0A</text>
+
+  <!-- ==================== ESP32-C3 MCU (Center) ==================== -->
+  <g id="mcu">
+    <rect x="560" y="280" width="480" height="320" rx="12" fill="url(#grad-mcu)" stroke="#2a6a2a" stroke-width="2" filter="url(#glow-green)"/>
+    <rect x="580" y="300" width="440" height="280" rx="8" fill="none" stroke="#1f4f1f" stroke-width="1" opacity="0.5"/>
+    <rect x="660" y="340" width="280" height="200" rx="4" fill="#0f1f0f" stroke="#3a7a3a" stroke-width="1.5"/>
+    <text x="800" y="430" class="module-label" font-size="18" fill="#c0f0c0">ESP32-C3</text>
+    <text x="800" y="450" class="module-sub" font-size="11">WROOM-02-N4</text>
+    <text x="800" y="468" class="module-sub" font-size="9" fill="#509050">WiFi 2.4GHz + BLE 5.0</text>
+    <!-- Antenna arcs -->
+    <path d="M 950 380 A 30 30 0 0 1 950 420" fill="none" stroke="#40ff60" stroke-width="1.5" opacity="0.6"/>
+    <path d="M 960 370 A 45 45 0 0 1 960 430" fill="none" stroke="#40ff60" stroke-width="1.5" opacity="0.4"/>
+    <!-- Left pin dots -->
+    <g fill="#60c060">
+      <circle cx="572" cy="320" r="3"/><circle cx="572" cy="340" r="3"/><circle cx="572" cy="360" r="3"/><circle cx="572" cy="380" r="3"/>
+      <circle cx="572" cy="400" r="3"/><circle cx="572" cy="420" r="3"/><circle cx="572" cy="440" r="3"/><circle cx="572" cy="460" r="3"/>
+      <circle cx="572" cy="480" r="3"/><circle cx="572" cy="500" r="3"/><circle cx="572" cy="520" r="3"/><circle cx="572" cy="540" r="3"/>
+    </g>
+    <!-- Right pin dots -->
+    <g fill="#60c060">
+      <circle cx="1028" cy="320" r="3"/><circle cx="1028" cy="340" r="3"/><circle cx="1028" cy="360" r="3"/><circle cx="1028" cy="380" r="3"/>
+      <circle cx="1028" cy="400" r="3"/><circle cx="1028" cy="420" r="3"/><circle cx="1028" cy="440" r="3"/><circle cx="1028" cy="460" r="3"/>
+      <circle cx="1028" cy="480" r="3"/><circle cx="1028" cy="500" r="3"/><circle cx="1028" cy="520" r="3"/><circle cx="1028" cy="540" r="3"/>
+    </g>
+  </g>
+
+  <!-- ==================== USB-C Module (Right) ==================== -->
+  <g id="usb">
+    <rect x="1180" y="340" width="200" height="180" rx="10" fill="url(#grad-box)" stroke="#2a7a7a" stroke-width="2" filter="url(#glow-cyan)"/>
+    <text x="1280" y="372" class="module-label" fill="#a0f0f0">USB-C</text>
+    <text x="1280" y="390" class="module-sub">Type-C 018</text>
+    <rect x="1230" y="418" width="100" height="50" rx="25" fill="#0a2020" stroke="#30c0c0" stroke-width="2"/>
+    <rect x="1240" y="433" width="80" height="20" rx="10" fill="#102828" stroke="#208080" stroke-width="1"/>
+    <text x="1280" y="492" class="pin-label" fill="#60c0c0">VBUS  ESD  D+/D-</text>
+  </g>
+
+  <!-- ==================== SWD/JTAG Interface (Left) ==================== -->
+  <g id="swd">
+    <rect x="180" y="300" width="240" height="280" rx="10" fill="url(#grad-box)" stroke="#6a2a7a" stroke-width="2" filter="url(#glow-purple)"/>
+    <text x="300" y="325" class="module-label" fill="#e0a0f0">DEBUG PORT</text>
+    <text x="300" y="342" class="module-sub">CN1  1x8P  2.0mm</text>
+    <g>
+      <rect x="210" y="380" width="40" height="14" rx="2" fill="#1a0a1a" stroke="#804080" stroke-width="1"/><text x="265" y="388" class="pin-label" text-anchor="start" fill="#c080c0">1  IF_3V3</text>
+      <rect x="210" y="400" width="40" height="14" rx="2" fill="#1a0a1a" stroke="#804080" stroke-width="1"/><text x="265" y="408" class="pin-label" text-anchor="start" fill="#c080c0">2  GND</text>
+      <rect x="210" y="420" width="40" height="14" rx="2" fill="#1a0a1a" stroke="#804080" stroke-width="1"/><text x="265" y="428" class="pin-label" text-anchor="start" fill="#c080c0">3  SWDIO (IO4)</text>
+      <rect x="210" y="440" width="40" height="14" rx="2" fill="#1a0a1a" stroke="#804080" stroke-width="1"/><text x="265" y="448" class="pin-label" text-anchor="start" fill="#c080c0">4  IO5</text>
+      <rect x="210" y="460" width="40" height="14" rx="2" fill="#1a0a1a" stroke="#804080" stroke-width="1"/><text x="265" y="468" class="pin-label" text-anchor="start" fill="#c080c0">5  SWCLK (IO6)</text>
+      <rect x="210" y="480" width="40" height="14" rx="2" fill="#1a0a1a" stroke="#804080" stroke-width="1"/><text x="265" y="488" class="pin-label" text-anchor="start" fill="#c080c0">6  SWO (IO7)</text>
+      <rect x="210" y="500" width="40" height="14" rx="2" fill="#1a0a1a" stroke="#804080" stroke-width="1"/><text x="265" y="508" class="pin-label" text-anchor="start" fill="#c080c0">7  IO2</text>
+      <rect x="210" y="520" width="40" height="14" rx="2" fill="#1a0a1a" stroke="#804080" stroke-width="1"/><text x="265" y="528" class="pin-label" text-anchor="start" fill="#c080c0">8  nRST (IO10)</text>
+    </g>
+    <text x="300" y="565" class="module-sub" font-size="8" fill="#504050">ESD: PESD3V3L2BT x3</text>
+  </g>
+
+  <!-- ESD Chips -->
+  <g>
+    <rect x="460" y="420" width="60" height="30" rx="4" fill="#140a14" stroke="#603060" stroke-width="1" opacity="0.8"/>
+    <text x="490" y="440" class="pin-label" font-size="8" fill="#804080">U5 U6</text>
+    <rect x="460" y="460" width="60" height="30" rx="4" fill="#140a14" stroke="#603060" stroke-width="1" opacity="0.8"/>
+    <text x="490" y="480" class="pin-label" font-size="8" fill="#804080">U4</text>
+  </g>
+
+  <!-- ==================== Power Management (Bottom) ==================== -->
+  <g id="power">
+    <line x1="200" y1="780" x2="1400" y2="780" stroke="#f0a030" stroke-width="3" opacity="0.3"/>
+    
+    <rect x="180" y="700" width="160" height="100" rx="8" fill="url(#grad-box)" stroke="#a07020" stroke-width="2" filter="url(#glow-orange)"/>
+    <text x="260" y="732" class="module-label" fill="#f0d080">VBUS 5V</text>
+    <text x="260" y="750" class="module-sub">USB Input</text>
+    <circle cx="260" cy="768" r="8" fill="none" stroke="#f0a030" stroke-width="2"/>
+    <text x="260" y="786" class="pin-label" fill="#c09040">USB-C VBUS</text>
+
+    <rect x="400" y="720" width="140" height="80" rx="8" fill="url(#grad-box)" stroke="#a07020" stroke-width="2" filter="url(#glow-orange)"/>
+    <text x="470" y="742" class="module-label" font-size="12" fill="#f0d080">TP4054</text>
+    <text x="470" y="758" class="module-sub" font-size="9">Li-Ion Charger</text>
+    <circle cx="470" cy="772" r="4" fill="#ff4040" opacity="0.8"/>
+    <text x="470" y="788" class="pin-label" font-size="8" fill="#c09040">LED1 Charge</text>
+
+    <rect x="600" y="730" width="100" height="60" rx="6" fill="#1a1005" stroke="#c08030" stroke-width="1.5"/>
+    <text x="650" y="763" class="module-label" font-size="12" fill="#f0c060">BAT+</text>
+
+    <rect x="760" y="735" width="80" height="50" rx="6" fill="url(#grad-box)" stroke="#a07020" stroke-width="1.5"/>
+    <text x="800" y="754" class="module-label" font-size="10" fill="#f0d080">Q1 P-MOS</text>
+    <text x="800" y="770" class="module-sub" font-size="8">AO3401A</text>
+
+    <rect x="900" y="735" width="80" height="50" rx="6" fill="url(#grad-box)" stroke="#a07020" stroke-width="1.5"/>
+    <text x="940" y="754" class="module-label" font-size="10" fill="#f0d080">SW</text>
+    <text x="940" y="770" class="module-sub" font-size="8">MSK12C02</text>
+
+    <rect x="1040" y="720" width="140" height="80" rx="8" fill="url(#grad-box)" stroke="#40a040" stroke-width="2" filter="url(#glow-green)"/>
+    <text x="1110" y="742" class="module-label" font-size="12" fill="#80f080">M3406</text>
+    <text x="1110" y="758" class="module-sub" font-size="9">Buck 3.3V</text>
+    <text x="1110" y="774" class="pin-label" font-size="8" fill="#509050">L1 2.2uH</text>
+
+    <rect x="1240" y="730" width="120" height="60" rx="6" fill="#0a1a0a" stroke="#40ff60" stroke-width="2" filter="url(#glow-green)"/>
+    <text x="1300" y="763" class="module-label" font-size="14" fill="#40ff60">MCU_3V3</text>
+
+    <rect x="1180" y="640" width="80" height="40" rx="4" fill="#0a1a0a" stroke="#60c060" stroke-width="1.5"/>
+    <text x="1220" y="656" class="module-label" font-size="9" fill="#80e080">Fuse 0.5A</text>
+    <text x="1220" y="672" class="module-sub" font-size="8">U3</text>
+
+    <rect x="1180" y="580" width="80" height="30" rx="4" fill="#0a1a0a" stroke="#40a040" stroke-width="1" opacity="0.8"/>
+    <text x="1220" y="598" class="pin-label" fill="#60c060">IF_3V3</text>
+  </g>
+
+  <!-- ==================== Status & Control (Top-Left) ==================== -->
+  <g id="status">
+    <rect x="200" y="160" width="140" height="80" rx="8" fill="url(#grad-box)" stroke="#2060a0" stroke-width="2" filter="url(#glow-cyan)"/>
+    <circle cx="240" cy="200" r="12" fill="#102040" stroke="#3080d0" stroke-width="2"/>
+    <circle cx="240" cy="200" r="6" fill="#2080ff" opacity="0.8"/>
+    <text x="290" y="192" class="module-label" font-size="11" fill="#a0d0f0">Status LED</text>
+    <text x="290" y="208" class="module-sub" font-size="9">IO0  Blue</text>
+    <text x="290" y="224" class="module-sub" font-size="8" fill="#406080">XL-1005UBC</text>
+
+    <rect x="380" y="160" width="140" height="80" rx="8" fill="url(#grad-box)" stroke="#705020" stroke-width="2" filter="url(#glow-orange)"/>
+    <rect x="410" y="185" width="40" height="30" rx="4" fill="#1a1005" stroke="#a07030" stroke-width="2"/>
+    <circle cx="430" cy="200" r="8" fill="#302010" stroke="#c08040" stroke-width="1.5"/>
+    <text x="475" y="192" class="module-label" font-size="11" fill="#f0d0a0">BOOT</text>
+    <text x="475" y="208" class="module-sub" font-size="9">SW1  IO9</text>
+    <text x="475" y="224" class="module-sub" font-size="8" fill="#806040">TS-1088</text>
+  </g>
+
+  <!-- ==================== Test Points (Top-Right) ==================== -->
+  <g id="tps">
+    <rect x="1180" y="160" width="180" height="100" rx="8" fill="url(#grad-box)" stroke="#505050" stroke-width="1.5"/>
+    <text x="1270" y="180" class="module-label" font-size="11" fill="#b0b0b0">Test Points</text>
+    <circle cx="1210" cy="210" r="6" fill="#1a1a1a" stroke="#808080" stroke-width="1.5"/><text x="1210" y="230" class="pin-label" fill="#909090">TP1</text>
+    <circle cx="1240" cy="210" r="6" fill="#1a1a1a" stroke="#808080" stroke-width="1.5"/><text x="1240" y="230" class="pin-label" fill="#909090">TP2 BAT+</text>
+    <circle cx="1290" cy="210" r="6" fill="#1a1a1a" stroke="#808080" stroke-width="1.5"/><text x="1290" y="230" class="pin-label" fill="#909090">TP3 TXD</text>
+    <circle cx="1330" cy="210" r="6" fill="#1a1a1a" stroke="#808080" stroke-width="1.5"/><text x="1330" y="230" class="pin-label" fill="#909090">TP4 RXD</text>
+  </g>
+
+  <!-- ==================== Connection Lines ==================== -->
+  <!-- USB D+/D- to MCU -->
+  <path d="M 1180 450 Q 1100 450 1040 420" fill="none" stroke="#30a0a0" stroke-width="2" opacity="0.5"/>
+  <path d="M 1180 470 Q 1100 470 1040 440" fill="none" stroke="#30a0a0" stroke-width="2" opacity="0.5"/>
+  <path d="M 1180 450 Q 1100 450 1040 420" fill="none" stroke="#30e0f0" stroke-width="2" class="flow-dash"/>
+  <path d="M 1180 470 Q 1100 470 1040 440" fill="none" stroke="#30e0f0" stroke-width="2" class="flow-dash" style="animation-delay:0.2s"/>
+
+  <!-- USB VBUS to Power Chain -->
+  <path d="M 1280 700 L 1280 650 L 340 650 L 340 700" fill="none" stroke="#f0a030" stroke-width="2" opacity="0.4"/>
+  <path d="M 1280 700 L 1280 650 L 340 650 L 340 700" fill="none" stroke="#f0a030" stroke-width="2" class="flow-dash" style="animation-delay:0.5s"/>
+
+  <!-- VBUS to Charger -->
+  <path d="M 340 740 L 400 740" fill="none" stroke="#f0a030" stroke-width="2"/>
+  <path d="M 340 740 L 400 740" fill="none" stroke="#f0a030" stroke-width="2" class="flow-dash"/>
+
+  <!-- Charger to BAT+ -->
+  <path d="M 540 760 L 600 760" fill="none" stroke="#f0a030" stroke-width="2"/>
+
+  <!-- BAT+ to Q1 -->
+  <path d="M 700 760 L 760 760" fill="none" stroke="#f0a030" stroke-width="2"/>
+
+  <!-- Q1 to SW to Buck -->
+  <path d="M 840 760 L 900 760" fill="none" stroke="#f0a030" stroke-width="2"/>
+  <path d="M 980 760 L 1040 760" fill="none" stroke="#f0a030" stroke-width="2"/>
+
+  <!-- Buck to 3V3 -->
+  <path d="M 1180 760 L 1240 760" fill="none" stroke="#40ff60" stroke-width="2"/>
+  <path d="M 1180 760 L 1240 760" fill="none" stroke="#40ff60" stroke-width="2" class="flow-dash"/>
+
+  <!-- 3V3 to MCU -->
+  <path d="M 1300 730 L 1300 620 L 900 620 L 900 600" fill="none" stroke="#40ff60" stroke-width="2" opacity="0.4"/>
+  <path d="M 900 600 L 900 580" fill="none" stroke="#40ff60" stroke-width="2"/>
+
+  <!-- 3V3 up to MCU left side -->
+  <path d="M 1240 730 L 1100 730 L 1100 600 L 1040 600" fill="none" stroke="#40ff60" stroke-width="2" opacity="0.4"/>
+
+  <!-- Fuse IF_3V3 to CN1 -->
+  <path d="M 1180 600 L 600 600 L 600 380 L 420 380" fill="none" stroke="#60c060" stroke-width="1.5" opacity="0.5"/>
+
+  <!-- Debug signals MCU to ESD to CN1 -->
+  <path d="M 560 440 L 520 440 L 520 435 L 420 435" fill="none" stroke="#a040c0" stroke-width="1.5" opacity="0.5"/>
+  <path d="M 560 460 L 520 460 L 520 445 L 420 445" fill="none" stroke="#a040c0" stroke-width="1.5" opacity="0.5"/>
+  <path d="M 560 480 L 520 480 L 520 465 L 420 465" fill="none" stroke="#a040c0" stroke-width="1.5" opacity="0.5"/>
+  <path d="M 560 500 L 520 500 L 520 475 L 420 475" fill="none" stroke="#a040c0" stroke-width="1.5" opacity="0.5"/>
+  <path d="M 560 520 L 520 520 L 520 505 L 420 505" fill="none" stroke="#a040c0" stroke-width="1.5" opacity="0.5"/>
+  <path d="M 560 540 L 520 540 L 520 525 L 420 525" fill="none" stroke="#a040c0" stroke-width="1.5" opacity="0.5"/>
+
+  <!-- Animated debug flows -->
+  <path d="M 560 440 L 520 440 L 520 435 L 420 435" fill="none" stroke="#c040ff" stroke-width="1.5" class="flow-dash"/>
+  <path d="M 560 480 L 520 480 L 520 465 L 420 465" fill="none" stroke="#c040ff" stroke-width="1.5" class="flow-dash" style="animation-delay:0.3s"/>
+  <path d="M 560 520 L 520 520 L 520 505 L 420 505" fill="none" stroke="#c040ff" stroke-width="1.5" class="flow-dash" style="animation-delay:0.6s"/>
+
+  <!-- LED control from MCU -->
+  <path d="M 560 320 L 500 320 L 500 200 L 340 200" fill="none" stroke="#2080c0" stroke-width="1.5" opacity="0.4"/>
+  <path d="M 560 320 L 500 320 L 500 200 L 340 200" fill="none" stroke="#30a0f0" stroke-width="1.5" class="flow-dash"/>
+
+  <!-- BOOT to MCU -->
+  <path d="M 450 200 L 500 200 L 500 280" fill="none" stroke="#c08030" stroke-width="1.5" opacity="0.4"/>
+  <path d="M 450 200 L 500 200 L 500 280" fill="none" stroke="#f0a030" stroke-width="1.5" class="flow-dash"/>
+
+  <!-- UART Test points from MCU -->
+  <path d="M 1040 320 L 1100 320 L 1100 200 L 1180 200" fill="none" stroke="#808080" stroke-width="1" opacity="0.3"/>
+  <path d="M 1040 340 L 1100 340 L 1100 230 L 1180 230" fill="none" stroke="#808080" stroke-width="1" opacity="0.3"/>
+
+  <!-- Legend -->
+  <g transform="translate(1350, 840)">
+    <rect x="0" y="0" width="220" height="130" rx="8" fill="#0a140a" stroke="#1a3a1a" stroke-width="1" opacity="0.9"/>
+    <text x="110" y="20" class="module-label" font-size="11" fill="#80a080">Signal Legend</text>
+    <line x1="15" y1="40" x2="45" y2="40" stroke="#f0a030" stroke-width="2"/><text x="55" y="40" class="pin-label" text-anchor="start" fill="#c09040">5V Power (VBUS)</text>
+    <line x1="15" y1="60" x2="45" y2="60" stroke="#40ff60" stroke-width="2"/><text x="55" y="60" class="pin-label" text-anchor="start" fill="#60c060">3.3V Power (MCU_3V3)</text>
+    <line x1="15" y1="80" x2="45" y2="80" stroke="#30e0f0" stroke-width="2"/><text x="55" y="80" class="pin-label" text-anchor="start" fill="#60c0c0">USB Data</text>
+    <line x1="15" y1="100" x2="45" y2="100" stroke="#c040ff" stroke-width="2"/><text x="55" y="100" class="pin-label" text-anchor="start" fill="#a060c0">Debug (SWD/JTAG)</text>
+    <line x1="15" y1="120" x2="45" y2="120" stroke="#f0a030" stroke-width="2" stroke-dasharray="4 3"/><text x="55" y="120" class="pin-label" text-anchor="start" fill="#a08060">Control / GPIO</text>
+  </g>
+
+  <!-- Decorative corner accents -->
+  <path d="M 80 80 L 120 80 L 120 85 L 85 85 L 85 120 L 80 120 Z" fill="#1a4a1a" opacity="0.5"/>
+  <path d="M 1520 80 L 1480 80 L 1480 85 L 1515 85 L 1515 120 L 1520 120 Z" fill="#1a4a1a" opacity="0.5"/>
+  <path d="M 80 920 L 120 920 L 120 915 L 85 915 L 85 880 L 80 880 Z" fill="#1a4a1a" opacity="0.5"/>
+  <path d="M 1520 920 L 1480 920 L 1480 915 L 1515 915 L 1515 880 L 1520 880 Z" fill="#1a4a1a" opacity="0.5"/>
+
+</svg>
+</body>
+</html>
