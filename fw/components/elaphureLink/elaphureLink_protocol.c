@@ -38,17 +38,7 @@ void el_process_buffer_free() {
 }
 
 int el_handshake_process(int fd, void *buffer, size_t len) {
-    if (len != sizeof(el_request_handshake)) {
-        return -1;
-    }
-
-    el_request_handshake* req = (el_request_handshake*)buffer;
-
-    if (ntohl(req->el_link_identifier) != EL_LINK_IDENTIFIER) {
-        return -1;
-    }
-
-    if (ntohl(req->command) != EL_COMMAND_HANDSHAKE) {
+    if (el_handshake_validate(buffer, len) != 0) {
         return -1;
     }
 

@@ -8,6 +8,9 @@ CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
 # Partition table: dual OTA app slots (required for wireless OTA update)
 CONFIG_PARTITION_TABLE_TWO_OTA=y
 
+# WebSocket support for the web serial terminal (/ws/uart)
+CONFIG_HTTPD_WS_SUPPORT=y
+
 # CPU Frequency
 CONFIG_ESP32C3_DEFAULT_CPU_FREQ_160=y
 

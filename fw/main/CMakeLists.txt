@@ -11,6 +11,7 @@ idf_component_register(
         "button_handle.c"
         "wifi_config_store.c"
         "web_server.c"
+        "access_control.c"
     INCLUDE_DIRS
         "."
         ".."

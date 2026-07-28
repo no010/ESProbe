@@ -31,6 +31,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #include <stdatomic.h>
 
 #include "main/wifi_configuration.h"
+#include "main/uart_bridge.h"
+#include "main/access_control.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -94,6 +96,8 @@ static uint8_t uart_read_buffer[UART_BUF_SIZE];
 static struct netconn *uart_netconn = NULL;
 static bool is_conn_valid = false; // lock free
 static bool is_first_time_recv = false;
+// Set while a WebSocket terminal client owns UART RX (see uart_bridge.h).
+static _Atomic bool ws_claimed = false;
 
 void uart_bridge_close() {
     netconn_events events;
@@ -230,7 +234,7 @@ void uart_bridge_task() {
 
         if (ret != pdTRUE) {
             // timeout
-            if (is_conn_valid) {
+            if (is_conn_valid && !atomic_load(&ws_claimed)) {
                 ESP_ERROR_CHECK(uart_get_buffered_data_len(UART_BRIDGE_RX, &uart_buf_len));
                 uart_buf_len = uart_buf_len > UART_BUF_SIZE ? UART_BUF_SIZE : uart_buf_len;
                 uart_buf_len = uart_read_bytes(UART_BRIDGE_RX, uart_read_buffer, uart_buf_len, pdMS_TO_TICKS(5));
@@ -261,6 +265,18 @@ void uart_bridge_task() {
             uint16_t client_port;  // Client port
             netconn_peer(nc_in, &client_addr, &client_port);
 
+            // Optional PIN gate: reject clients not unlocked via web portal.
+#if LWIP_IPV6
+            uint32_t ip4 = IP_IS_V4(&client_addr) ? ip_2_ip4(&client_addr)->addr : 0;
+#else
+            uint32_t ip4 = ip_2_ip4(&client_addr)->addr;
+#endif
+            if (!access_control_is_allowed(ip4)) {
+                ESP_LOGW(UART_TAG, "client rejected by access control");
+                close_tcp_netconn(nc_in);
+                continue;
+            }
+
             uart_netconn = nc_in;
             is_conn_valid = true;
             is_first_time_recv = true;
@@ -269,12 +285,14 @@ void uart_bridge_task() {
             //     tcp_nagle_disable(events.nc->pcb.tcp);
 
             uart_netconn = events.nc;
-            // read data from UART
-            ESP_ERROR_CHECK(uart_get_buffered_data_len(UART_BRIDGE_RX, &uart_buf_len));
-            uart_buf_len = uart_buf_len > UART_BUF_SIZE ? UART_BUF_SIZE : uart_buf_len;
-            uart_buf_len = uart_read_bytes(UART_BRIDGE_RX, uart_read_buffer, uart_buf_len, pdMS_TO_TICKS(5));
-            // then send data
-            netconn_write(events.nc, uart_read_buffer, uart_buf_len, NETCONN_COPY);
+            // read data from UART (paused while the web terminal holds the claim)
+            if (!atomic_load(&ws_claimed)) {
+                ESP_ERROR_CHECK(uart_get_buffered_data_len(UART_BRIDGE_RX, &uart_buf_len));
+                uart_buf_len = uart_buf_len > UART_BUF_SIZE ? UART_BUF_SIZE : uart_buf_len;
+                uart_buf_len = uart_read_bytes(UART_BRIDGE_RX, uart_read_buffer, uart_buf_len, pdMS_TO_TICKS(5));
+                // then send data
+                netconn_write(events.nc, uart_read_buffer, uart_buf_len, NETCONN_COPY);
+            }
 
             // try to get data
             if ((netconn_recv(events.nc, &netbuf)) == ERR_OK) // data incoming ?
@@ -310,5 +328,51 @@ void uart_bridge_task() {
         }
     }
 }
+
+// ---------------------------------------------------------------------------
+// Shared UART access for the WebSocket terminal (see uart_bridge.h)
+// ---------------------------------------------------------------------------
+
+bool uart_bridge_ws_take(void) {
+    bool expected = false;
+    return atomic_compare_exchange_strong(&ws_claimed, &expected, true);
+}
+
+void uart_bridge_ws_release(void) {
+    atomic_store(&ws_claimed, false);
+}
+
+int uart_bridge_read(uint8_t *buf, size_t maxlen, uint32_t wait_ms) {
+    size_t buffered = 0;
+    if (uart_get_buffered_data_len(UART_BRIDGE_RX, &buffered) != ESP_OK)
+        return -1;
+    buffered = buffered > maxlen ? maxlen : buffered;
+    if (buffered == 0) {
+        // Block briefly for fresh data so the poller does not spin.
+        return uart_read_bytes(UART_BRIDGE_RX, buf, maxlen > 64 ? 64 : maxlen,
+                               pdMS_TO_TICKS(wait_ms));
+    }
+    return uart_read_bytes(UART_BRIDGE_RX, buf, buffered, 0);
+}
+
+void uart_bridge_write(const uint8_t *data, size_t len) {
+    uart_write_bytes(UART_BRIDGE_TX, (const char *)data, len);
+}
+
+void uart_bridge_set_baud(int baudrate) {
+    if (baudrate > 0 && baudrate < 2000000) {
+        uart_set_baudrate(UART_BRIDGE_RX, baudrate);
+        uart_set_baudrate(UART_BRIDGE_TX, baudrate);
+    }
+}
+
+#else  // (USE_UART_BRIDGE == 1)
+
+// Bridge disabled: provide stubs so web_server links without UART support.
+bool uart_bridge_ws_take(void) { return false; }
+void uart_bridge_ws_release(void) {}
+int uart_bridge_read(uint8_t *buf, size_t maxlen, uint32_t wait_ms) { return -1; }
+void uart_bridge_write(const uint8_t *data, size_t len) {}
+void uart_bridge_set_baud(int baudrate) {}
 
 #endif // (USE_UART_BRIDGE == 1)

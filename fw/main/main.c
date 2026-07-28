@@ -14,6 +14,7 @@
 #include "main/led_status.h"
 #include "main/button_handle.h"
 #include "main/web_server.h"
+#include "main/access_control.h"
 #include "main/dap_configuration.h"
 #include "components/USBIP/usb_descriptor.h"
 
@@ -90,6 +91,9 @@ void mdns_setup() {
 
 void app_main() {
     ESP_ERROR_CHECK(nvs_flash_init());
+
+    // Load optional debug-port PIN before any server starts listening.
+    access_control_init();
 
     // LED status indicator starts in BOOTING state.
     led_status_init();

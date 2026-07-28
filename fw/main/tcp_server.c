@@ -14,6 +14,7 @@
 #include "main/wifi_configuration.h"
 #include "main/usbip_server.h"
 #include "main/DAP_handle.h"
+#include "main/access_control.h"
 
 #include "components/elaphureLink/elaphureLink_protocol.h"
 
@@ -35,6 +36,36 @@ extern TaskHandle_t kDAPTaskHandle;
 extern int kRestartDAPHandle;
 
 int kSock = -1;
+
+// Extract the client IPv4 address (network byte order) from a connected
+// socket. Handles both plain AF_INET and IPv4-mapped IPv6 peers (the
+// listener is dual-stack). Returns 0 when the address cannot be resolved.
+static uint32_t client_ip4_of_sock(int sock)
+{
+    struct sockaddr_storage peer;
+    socklen_t len = sizeof(peer);
+    if (getpeername(sock, (struct sockaddr *)&peer, &len) != 0)
+        return 0;
+
+    if (peer.ss_family == AF_INET) {
+        return ((struct sockaddr_in *)&peer)->sin_addr.s_addr;
+    }
+#if LWIP_IPV6
+    if (peer.ss_family == AF_INET6) {
+        const struct sockaddr_in6 *p6 = (const struct sockaddr_in6 *)&peer;
+        const uint8_t *b = (const uint8_t *)p6->sin6_addr.un.u8_addr;
+        // IPv4-mapped: ::ffff:a.b.c.d
+        static const uint8_t v4_mapped_prefix[12] =
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xFF, 0xFF};
+        if (memcmp(b, v4_mapped_prefix, sizeof(v4_mapped_prefix)) == 0) {
+            uint32_t ip;
+            memcpy(&ip, b + 12, 4);
+            return ip;
+        }
+    }
+#endif
+    return 0;
+}
 
 void tcp_server_task(void *pvParameters)
 {
@@ -113,6 +144,15 @@ void tcp_server_task(void *pvParameters)
             setsockopt(kSock, SOL_SOCKET, SO_KEEPALIVE, (void *)&on, sizeof(on));
             setsockopt(kSock, IPPROTO_TCP, TCP_NODELAY, (void *)&on, sizeof(on));
             os_printf("Socket accepted\r\n");
+
+            // Optional PIN gate: reject clients not unlocked via web portal.
+            if (!access_control_is_allowed(client_ip4_of_sock(kSock)))
+            {
+                os_printf("Client rejected by access control (unlock via web portal)\r\n");
+                close(kSock);
+                kSock = -1;
+                continue;
+            }
 
             // Read header
             sz = 4;

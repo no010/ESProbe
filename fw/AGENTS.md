@@ -80,14 +80,15 @@ fw/
 │   ├── main.c                  # app_main：初始化 NVS、WiFi、DAP、Timer、mDNS、Web 服务器、创建任务
 │   ├── wifi_handle.c/h         # WiFi STA 模式、多 AP 轮询、AP 回退、静态 IP
 │   ├── wifi_config_store.c/h   # WiFi 凭证的 NVS 持久化
-│   ├── web_server.c/h          # HTTP 配置门户 + 状态 + OTA 端点（端口 80）
+│   ├── web_server.c/h          # HTTP 配置门户 + 状态 + OTA + Web 串口终端（端口 80）
+│   ├── access_control.c/h      # 可选 PIN 门控（NVS 存储 + IP 会话白名单）
 │   ├── led_status.c/h          # 状态 LED 模式
 │   ├── button_handle.c/h       # Boot 按键处理
 │   ├── tcp_server.c/h          # BSD socket TCP 监听器（端口 3240）
 │   ├── usbip_server.c/h        # USBIP Stage1/Stage2 协议状态机
 │   ├── DAP_handle.c/h          # Ringbuffer 解耦层：USBIP 网络线程与 DAP 执行线程
 │   ├── uart_bridge.c/h         # UART1 <-> TCP netconn 桥接（端口 1234）
-│   ├── timer.c/h               # DAP 时间戳定时器（ESP32-C3 上已 stub，返回 0）
+│   ├── timer.c/h               # DAP 时间戳：esp_timer 微秒计数（TIMESTAMP_CLOCK 1MHz）
 │   ├── dap_configuration.h     # WinUSB、包大小、SPI SIO、强制复位开关
 │   ├── wifi_configuration.h    # WiFi 凭证、静态 IP、mDNS、UART 桥接开关
 │   └── Kconfig.projbuild       # 仅添加 USE_WEBSOCKET_DAP（当前未使用）
@@ -126,7 +127,7 @@ fw/
 - LWIP：主机名 `esprobe`，TCP MSS=1440，SND/WND buf=5744
 - UART ISR 放在 IRAM 中（低延迟）
 - Main task 栈大小：3584 字节
-- 分区表：使用内置 `partitions_singleapp.csv`（单 App，无自定义分区表）
+- 分区表：`CONFIG_PARTITION_TABLE_TWO_OTA=y`（otadata + factory + ota_0 + ota_1，支撑 Web OTA）
 
 ### 2. 项目 Kconfig（main/Kconfig.projbuild）
 仅添加一个布尔选项 `USE_WEBSOCKET_DAP`，当前代码中未引用。
@@ -252,16 +253,16 @@ set(IDF_TARGET "esp32c3")
 
 1. **WiFi 凭证硬编码**：`main/wifi_configuration.h` 中的 `wifi_list[]` 包含明文 SSID/密码。请勿将包含真实凭证的文件提交到公共仓库。
 2. **无加密传输**：USBIP 和 UART 桥接数据通过明文 TCP 传输，未使用 TLS。仅在受信任的本地网络环境中使用。
-3. **无身份验证**：任何能访问 TCP 3240 和 1234 端口的网络客户端都可以连接并控制调试器和串口。
+3. **访问控制**：默认无鉴权；可在 Web 门户设置 PIN（`POST /pin`），设置后 TCP 3240/1234 仅接受通过 `POST /unlock` 解锁的客户端 IP（重启后失效）。PIN 以明文 HTTP 传输，仅作为受信局域网的防误触措施，非加密安全。
 4. **Watchdog**：Task WDT 已启用（9000 ms），但 Interrupt WDT 已禁用。高优先级任务（`tcp_server` prio 14）必须避免长时间阻塞，否则可能触发 Task WDT。
 5. **SPI 加速未经验证**：`spi_op.c` 在 ESP32-C3 上的时序尚未用逻辑分析仪验证。如调试不稳定，可在 `dap_configuration.h` 中禁用 `USE_SPI_SIO` 或让调试器请求 < 10 MHz 时钟以强制使用 GPIO 模式。
-6. **固件升级**：`web_server.c` 提供了 Web 配置门户与 `POST /ota` 端点，但当前分区表为 `partitions_singleapp.csv`（单 App），OTA 烧写会在运行时报“No OTA partition”。实际固件更新仍需通过 UART/JTAG 物理接口烧录，除非切换到 two_ota 分区表。
+6. **固件升级**：`web_server.c` 提供 Web 配置门户与 `POST /ota` 端点，`sdkconfig.defaults` 已配置 `CONFIG_PARTITION_TABLE_TWO_OTA=y`（otadata + factory + ota_0 + ota_1），OTA 功能完整可用。若运行时报“No OTA partition”，说明本地 `sdkconfig` 是在该默认值加入前生成的陈旧文件——删掉 `fw/sdkconfig` 重新构建即可。
 
 ---
 
 ## 已知限制
 
-- `get_timer_count()` 在 ESP32-C3 上已 stub，返回 0，DAP 时间戳功能不可用。
+- `get_timer_count()` 在 ESP32-C3 上已用 `esp_timer_get_time()` 实现（微秒级，约 71 分钟回绕），DAP 时间戳可用。
 - SPI 加速时序在 ESP32-C3 上未经验证。
-- Web OTA 端点已存在但受限于单 App 分区表（见上节）；WebSocket、KCP 仍未移植。
-- 除 `scripts/verify_build.ps1` 的编译级验证外没有自动化测试，行为验证依赖实际硬件。
+- Web OTA 已可用（two_ota 分区表）；Web 串口终端需 `CONFIG_HTTPD_WS_SUPPORT=y`（已入 defaults）；WebSocket DAP、KCP 仍未移植。
+- 自动化验证：`scripts/verify_build.ps1`（编译级）+ `test_host/test_protocol.c`（主机端协议单测）+ GitHub Actions CI；行为验证仍依赖实际硬件。

@@ -17,14 +17,15 @@ fw/
 │   ├── main.c                  # app_main: WiFi, mDNS, DAP, TCP server, web server tasks
 │   ├── wifi_handle.c           # STA mode, AP fallback, static IP, event handlers
 │   ├── wifi_config_store.c     # NVS persistence for WiFi credentials
-│   ├── web_server.c            # HTTP config portal + status + OTA endpoint (port 80)
+│   ├── web_server.c            # HTTP config portal + status + OTA + web terminal (port 80)
+│   ├── access_control.c        # Optional PIN gate for debug ports (NVS + IP sessions)
 │   ├── tcp_server.c            # BSD socket listener on port 3240
 │   ├── usbip_server.c          # USBIP stage1/2 protocol handler
 │   ├── DAP_handle.c            # DAP command ringbuffer + worker thread
 │   ├── uart_bridge.c           # Optional UART<->TCP bridge
 │   ├── led_status.c            # Status LED patterns
 │   ├── button_handle.c         # Boot button handling
-│   ├── timer.c                 # DAP timestamp (stubbed on C3)
+│   ├── timer.c                 # DAP timestamp via esp_timer (1 MHz, TIMESTAMP_CLOCK)
 │   ├── dap_configuration.h     # WinUSB, packet size, reset options
 │   └── wifi_configuration.h    # SSID list, static IP, feature toggles
 ├── components/
@@ -151,10 +152,12 @@ See [references/idf-migration.md](references/idf-migration.md) for the API migra
 ## Known Issues & Constraints
 
 - **SPI acceleration unverified on ESP32-C3**: `spi_switch.c` compiles but needs logic-analyzer/scope validation against a real target. Fallback GPIO mode works.
-- **Timer stubbed**: `get_timer_count()` returns 0 on ESP32-C3/S3/32. DAP timestamp feature is non-functional.
+- **Timer implemented on C3**: `get_timer_count()` returns `esp_timer_get_time()` microseconds (`TIMESTAMP_CLOCK 1MHz`); wraps every ~71 min, still stubbed to 0 only on targets without esp_timer wiring.
 - **JTAG disabled**: `DAP_JTAG 0` in `DAP_config.h`. Only SWD is supported.
 - **elaphureLink proxy present**: `components/elaphureLink` implements the elaphureLink handshake/DAP framing and is wired into `tcp_server.c` (mDNS advertises `usbip+elaphurelink`). `DAP_vendor.c` still stubs `ID_DAP_Vendor8`; WebSocket and KCP remain absent.
-- **Web OTA endpoint exists but partition table is single-app**: `web_server.c` serves a config portal with `POST /ota`, but `sdkconfig` uses `partitions_singleapp.csv`, so OTA flashing fails at runtime with "No OTA partition" until the project switches to a two_ota partition table.
+- **Web OTA functional**: `web_server.c` serves a config portal with `POST /ota`; `sdkconfig.defaults` sets `CONFIG_PARTITION_TABLE_TWO_OTA=y` (otadata + factory + ota_0 + ota_1). If OTA reports "No OTA partition" at runtime, the local `sdkconfig` was generated before this default existed — delete `fw/sdkconfig` and rebuild to regenerate it from defaults.
+- **Optional PIN gate**: when a PIN is set via the web portal (`POST /pin`), TCP 3240/1234 only accept clients unlocked through `POST /unlock` (per-IP, until reboot). No PIN = fully open (backward compatible). Plain-HTTP PIN, LAN deterrent only.
+- **Web serial terminal**: `GET /terminal` + WebSocket `/ws/uart` (needs `CONFIG_HTTPD_WS_SUPPORT=y`). Single WS client; while connected the TCP 1234 bridge pauses UART RX forwarding (shared-claim in `uart_bridge.c`).
 - **CSR GPIO unavailable**: ESP32-C3 CSR instructions (`RV_SET_CSR`) removed; toolchain incompatibility in IDF 5.5.x. Use `gpio_ll_*` instead.
 - **Static IP hardcoded**: `wifi_handle.c` embeds IP directly; `wifi_configuration.h` macros not fully used there.
 

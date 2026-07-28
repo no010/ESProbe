@@ -31,6 +31,37 @@ typedef struct
 } __attribute__((packed)) el_response_handshake;
 
 
+// ---------------------------------------------------------------------------
+// Pure helpers (no lwip/socket dependency) — also compiled by host-side unit
+// tests, keep them free of ESP-IDF includes.
+// ---------------------------------------------------------------------------
+
+/** Read a big-endian 32-bit value from an unaligned buffer. */
+static inline uint32_t el_be32(const void *p)
+{
+    const uint8_t *b = (const uint8_t *)p;
+    return ((uint32_t)b[0] << 24) | ((uint32_t)b[1] << 16) |
+           ((uint32_t)b[2] << 8)  |  (uint32_t)b[3];
+}
+
+/**
+ * @brief Validate an elaphureLink handshake request packet.
+ * @return 0 when the packet is a well-formed handshake, -1 otherwise.
+ */
+static inline int el_handshake_validate(const void *buffer, size_t len)
+{
+    const uint8_t *b = (const uint8_t *)buffer;
+
+    if (buffer == NULL || len != sizeof(el_request_handshake))
+        return -1;
+    if (el_be32(b) != EL_LINK_IDENTIFIER)
+        return -1;
+    if (el_be32(b + 4) != EL_COMMAND_HANDSHAKE)
+        return -1;
+    return 0;
+}
+
+
 /**
  * @brief elahpureLink Proxy handshake phase process
  *
