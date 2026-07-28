@@ -1,0 +1,40 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+    paths: ['fw/**', '.github/workflows/build.yml']
+  pull_request:
+    paths: ['fw/**', '.github/workflows/build.yml']
+
+jobs:
+  host-tests:
+    name: Host protocol tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and run
+        run: |
+          gcc -Wall -Wextra -Werror -I fw fw/test_host/test_protocol.c -o test_protocol
+          ./test_protocol
+
+  firmware:
+    name: ESP32-C3 firmware build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build with ESP-IDF
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: v5.5.4
+          target: esp32c3
+          path: fw
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: esprobe_dap
+          path: |
+            fw/build/esprobe_dap.bin
+            fw/build/bootloader/bootloader.bin
+            fw/build/partition_table/partition-table.bin
+            fw/build/ota_data_initial.bin
