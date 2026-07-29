@@ -12,7 +12,7 @@ jobs:
     name: Host protocol tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Build and run
         run: |
           gcc -Wall -Wextra -Werror -I fw fw/test_host/test_protocol.c -o test_protocol
@@ -22,7 +22,7 @@ jobs:
     name: ESP32-C3 firmware build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Build with ESP-IDF
         uses: espressif/esp-idf-ci-action@v1
         with:
@@ -30,7 +30,7 @@ jobs:
           target: esp32c3
           path: fw
       - name: Upload firmware artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: esprobe_dap
           path: |
